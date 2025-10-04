@@ -21,6 +21,44 @@ const TAG_COLORS = [
   { name: 'orange', bg: 'bg-accent-orange/20', text: 'text-accent-orange', border: 'border-accent-orange/30' },
 ];
 
+const NOTE_COLORS = {
+  default: {
+    bg: 'bg-bg-elevated',
+    selected: 'bg-bg-elevated',
+    hover: 'bg-bg-hover',
+    text: 'text-text-primary',
+    textSelected: 'text-text-primary'
+  },
+  blue: {
+    bg: 'bg-accent-blue/10',
+    selected: 'bg-accent-blue/30',
+    hover: 'bg-accent-blue/20',
+    text: 'text-text-primary',
+    textSelected: 'text-text-primary'
+  },
+  green: {
+    bg: 'bg-accent-green/10',
+    selected: 'bg-accent-green/30',
+    hover: 'bg-accent-green/20',
+    text: 'text-text-primary',
+    textSelected: 'text-text-primary'
+  },
+  purple: {
+    bg: 'bg-accent-purple/10',
+    selected: 'bg-accent-purple/30',
+    hover: 'bg-accent-purple/20',
+    text: 'text-text-primary',
+    textSelected: 'text-text-primary'
+  },
+  orange: {
+    bg: 'bg-accent-orange/10',
+    selected: 'bg-accent-orange/30',
+    hover: 'bg-accent-orange/20',
+    text: 'text-text-primary',
+    textSelected: 'text-text-primary'
+  }
+};
+
 // Helper to group notes by date
 function groupNotesByDate(notes) {
   const now = new Date();
@@ -67,6 +105,9 @@ function NoteItem({ note, isSelected, onClick, index }) {
   const { deleteNote, updateNote } = useNotesStore();
   const preview = note.content?.substring(0, 100) || 'No content';
   const date = note.updatedAt ? formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true }) : '';
+
+  // Get color scheme for this note
+  const noteColor = NOTE_COLORS[note.color || 'default'] || NOTE_COLORS.default;
 
   const handleDelete = () => {
     toast((t) => (
@@ -141,15 +182,15 @@ function NoteItem({ note, isSelected, onClick, index }) {
           whileTap={{ scale: 0.98 }}
           onClick={onClick}
           className={`rounded-card p-2.5 cursor-pointer transition-all duration-200 ${
-            isSelected ? 'bg-accent-yellow shadow-hover' : 'bg-bg-elevated hover:bg-bg-hover hover:shadow-card'
+            isSelected ? `${noteColor.selected} shadow-hover` : `${noteColor.bg} hover:${noteColor.hover} hover:shadow-card`
           }`}
         >
           <div className="flex items-start gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className={`text-sm font-bold truncate tracking-tight ${isSelected ? 'text-text-inverse' : 'text-text-primary'}`}>
+              <h3 className={`text-sm font-bold truncate tracking-tight ${isSelected ? noteColor.textSelected : noteColor.text}`}>
                 {note.isPinned && '📌 '}{note.title || 'Untitled Note'}
               </h3>
-              <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isSelected ? 'text-text-inverse/90' : 'text-text-secondary'}`}>
+              <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isSelected ? `${noteColor.textSelected}/90` : 'text-text-secondary'}`}>
                 {date && `${date} • `}{preview}
               </p>
               {note.tags && note.tags.length > 0 && (
@@ -183,15 +224,15 @@ function NoteItem({ note, isSelected, onClick, index }) {
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         className={`hidden lg:block rounded-card p-2.5 cursor-pointer transition-all duration-200 ${
-          isSelected ? 'bg-accent-yellow shadow-hover' : 'bg-bg-elevated hover:bg-bg-hover hover:shadow-card'
+          isSelected ? `${noteColor.selected} shadow-hover` : `${noteColor.bg} hover:${noteColor.hover} hover:shadow-card`
         }`}
       >
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className={`text-sm font-bold truncate tracking-tight ${isSelected ? 'text-text-inverse' : 'text-text-primary'}`}>
+            <h3 className={`text-sm font-bold truncate tracking-tight ${isSelected ? noteColor.textSelected : noteColor.text}`}>
               {note.isPinned && '📌 '}{note.title || 'Untitled Note'}
             </h3>
-            <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isSelected ? 'text-text-inverse/90' : 'text-text-secondary'}`}>
+            <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isSelected ? `${noteColor.textSelected}/90` : 'text-text-secondary'}`}>
               {date && `${date} • `}{preview}
             </p>
             {note.tags && note.tags.length > 0 && (

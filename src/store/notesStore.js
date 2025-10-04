@@ -91,7 +91,8 @@ export const useNotesStore = create((set, get) => ({
         title,
         content,
         isPinned: false,
-        tags: []
+        tags: [],
+        color: 'default'
       });
 
       set({

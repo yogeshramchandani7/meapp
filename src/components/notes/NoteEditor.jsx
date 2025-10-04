@@ -12,6 +12,14 @@ const TAG_COLORS = [
   { name: 'orange', bg: 'bg-accent-orange/20', text: 'text-accent-orange', border: 'border-accent-orange/30' },
 ];
 
+const NOTE_COLOR_OPTIONS = [
+  { name: 'default', label: 'Default', color: '#3a3a3c', ring: 'ring-gray-500' },
+  { name: 'blue', label: 'Blue', color: '#0a84ff', ring: 'ring-accent-blue' },
+  { name: 'green', label: 'Green', color: '#32d74b', ring: 'ring-accent-green' },
+  { name: 'purple', label: 'Purple', color: '#bf5af2', ring: 'ring-accent-purple' },
+  { name: 'orange', label: 'Orange', color: '#ff9500', ring: 'ring-accent-orange' }
+];
+
 export default function NoteEditor() {
   const { getSelectedNote, updateNote, deleteNote, togglePinNote, notes } = useNotesStore();
   const selectedNote = getSelectedNote();
@@ -100,6 +108,12 @@ export default function NoteEditor() {
     if (selectedNote) {
       togglePinNote(selectedNote.id);
     }
+  };
+
+  const handleColorChange = async (colorName) => {
+    if (!selectedNote) return;
+    await updateNote(selectedNote.id, { color: colorName });
+    toast.success(`Color changed to ${colorName}`);
   };
 
   // Get all existing tags from all notes for autocomplete
@@ -202,6 +216,28 @@ export default function NoteEditor() {
         >
           Delete Note
         </button>
+      </div>
+
+      {/* Color Picker */}
+      <div className="mb-6 pb-4 border-b border-border">
+        <h3 className="text-xs font-semibold text-text-tertiary mb-3">Note Color</h3>
+        <div className="flex gap-3">
+          {NOTE_COLOR_OPTIONS.map((option) => (
+            <button
+              key={option.name}
+              onClick={() => handleColorChange(option.name)}
+              className={`group relative w-10 h-10 rounded-full transition-all duration-200 hover:scale-110 ${
+                (selectedNote.color || 'default') === option.name ? `ring-2 ${option.ring} ring-offset-2 ring-offset-bg-app` : ''
+              }`}
+              style={{ backgroundColor: option.color }}
+              title={option.label}
+            >
+              {(selectedNote.color || 'default') === option.name && (
+                <span className="absolute inset-0 flex items-center justify-center text-white text-lg">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Note Title */}
