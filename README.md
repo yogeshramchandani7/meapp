@@ -1,18 +1,12 @@
 # Task & Notes App
 
-A modern, feature-rich task management and note-taking application built with React, featuring dark mode UI, drag-and-drop functionality, and full markdown support.
+A modern, feature-rich task management and note-taking application built with React, featuring dark mode UI and drag-and-drop functionality.
 
 ## Features
 
 ### 📝 Notes
 
 - **Folders & Organization**: Create folders to organize your notes
-- **Rich Markdown Editor**: Full markdown support with live preview
-  - Syntax highlighting for code blocks
-  - Tables, checkboxes, lists, and more (GitHub Flavored Markdown)
-  - Split-pane view on desktop, toggle view on mobile
-  - Toolbar with quick formatting buttons
-  - Keyboard shortcuts (Cmd/Ctrl+B for bold, Cmd/Ctrl+I for italic, etc.)
 - **Drag & Drop Reordering**: Drag notes to manually reorder them within folders
 - **Color Coding**: Assign colors to notes for visual organization (5 minimalistic color options)
 - **Tags**: Add colorful tags to categorize notes
@@ -45,8 +39,6 @@ A modern, feature-rich task management and note-taking application built with Re
 - **Tailwind CSS** - Styling
 - **Framer Motion** - Animations
 - **@dnd-kit** - Drag and drop functionality
-- **react-markdown** - Markdown rendering
-- **react-syntax-highlighter** - Code syntax highlighting
 - **date-fns** - Date formatting and manipulation
 - **localStorage** - Data persistence
 
@@ -107,14 +99,10 @@ npm run test:e2e
 
 1. **Creating a Folder**: Click "+ New Folder" in the folder selector
 2. **Creating a Note**: Select a folder and click "+ New Note"
-3. **Using Markdown**:
-   - Use the toolbar buttons for quick formatting
-   - Or type markdown syntax directly (e.g., `# Heading`, `**bold**`, `*italic*`)
-   - Toggle preview on mobile or use split view on desktop
-4. **Drag to Reorder**: Click and drag notes to reorder them (pinned notes cannot be dragged)
-5. **Color Coding**: Select a color from the color picker in the note editor
-6. **Adding Tags**: Type tag name and click "Add Tag"
-7. **Pin Note**: Click the pin button to keep important notes at the top
+3. **Drag to Reorder**: Click and drag notes to reorder them (pinned notes cannot be dragged)
+4. **Color Coding**: Select a color from the color picker in the note editor
+5. **Adding Tags**: Type tag name and click "Add Tag"
+6. **Pin Note**: Click the pin button to keep important notes at the top
 
 ### Tasks
 
@@ -123,30 +111,6 @@ npm run test:e2e
 3. **Creating Cards**: Click "+ Add a card" within any list
 4. **Moving Cards**: Drag cards between lists or reorder within a list
 5. **Editing Cards**: Click on a card to open the detail modal
-
-## Markdown Support
-
-The app supports full GitHub Flavored Markdown (GFM):
-
-- **Headings**: `# H1`, `## H2`, `### H3`
-- **Bold**: `**bold text**` or `__bold text__`
-- **Italic**: `*italic text*` or `_italic text_`
-- **Strikethrough**: `~~strikethrough~~`
-- **Code**: `` `inline code` ``
-- **Code Blocks**: ` ```language ... ``` `
-- **Links**: `[link text](url)`
-- **Lists**: `- item` or `1. item`
-- **Checkboxes**: `- [ ] unchecked` or `- [x] checked`
-- **Quotes**: `> quote text`
-- **Tables**: Standard GFM table syntax
-- **Horizontal Rules**: `---`
-
-### Keyboard Shortcuts
-
-- `Cmd/Ctrl + B`: Bold
-- `Cmd/Ctrl + I`: Italic
-- `Cmd/Ctrl + K`: Insert link
-- `Tab`: Indent
 
 ## Project Structure
 
@@ -157,7 +121,6 @@ src/
 │   ├── notes/         # Notes-related components
 │   │   ├── NoteEditor.jsx
 │   │   ├── NotesList.jsx
-│   │   ├── MarkdownEditor.jsx
 │   │   └── FolderSelector.jsx
 │   ├── tasks/         # Task-related components
 │   │   ├── TasksView.jsx

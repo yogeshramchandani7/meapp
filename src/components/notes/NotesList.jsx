@@ -25,37 +25,6 @@ import {
 import 'react-swipeable-list/dist/styles.css';
 import { useNotesStore } from '../../store/notesStore';
 
-// Utility function to strip markdown formatting from text
-const stripMarkdown = (text) => {
-  if (!text) return '';
-  return text
-    // Remove code blocks
-    .replace(/```[\s\S]*?```/g, '[code]')
-    // Remove inline code
-    .replace(/`([^`]+)`/g, '$1')
-    // Remove headers
-    .replace(/^#{1,6}\s+/gm, '')
-    // Remove bold
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    // Remove italic
-    .replace(/\*([^*]+)\*/g, '$1')
-    // Remove strikethrough
-    .replace(/~~([^~]+)~~/g, '$1')
-    // Remove links
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Remove images
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    // Remove blockquotes
-    .replace(/^>\s+/gm, '')
-    // Remove list markers
-    .replace(/^[-*+]\s+/gm, '')
-    .replace(/^\d+\.\s+/gm, '')
-    // Remove horizontal rules
-    .replace(/^-{3,}$/gm, '')
-    // Clean up extra whitespace
-    .trim();
-};
-
 const TAG_COLORS = [
   { name: 'blue', bg: 'bg-accent-blue/20', text: 'text-accent-blue', border: 'border-accent-blue/30' },
   { name: 'green', bg: 'bg-accent-green/20', text: 'text-accent-green', border: 'border-accent-green/30' },
@@ -147,8 +116,7 @@ function groupNotesByDate(notes) {
 
 function NoteItem({ note, isSelected, onClick, index, isDraggable = true }) {
   const { deleteNote, updateNote } = useNotesStore();
-  const strippedContent = stripMarkdown(note.content || '');
-  const preview = strippedContent.substring(0, 100) || 'No content';
+  const preview = note.content?.substring(0, 100) || 'No content';
   const date = note.updatedAt ? formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true }) : '';
 
   // Get color scheme for this note
@@ -640,7 +608,7 @@ export default function NotesList() {
             {activeNote.isPinned && '📌 '}{activeNote.title || 'Untitled Note'}
           </h3>
           <p className="text-xs text-text-secondary line-clamp-2 mt-1">
-            {stripMarkdown(activeNote.content || '').substring(0, 100) || 'No content'}
+            {activeNote.content?.substring(0, 100) || 'No content'}
           </p>
           {activeNote.tags && activeNote.tags.length > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
