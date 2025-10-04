@@ -1,6 +1,19 @@
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   SwipeableList,
   SwipeableListItem,
@@ -11,6 +24,37 @@ import {
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
 import { useNotesStore } from '../../store/notesStore';
+
+// Utility function to strip markdown formatting from text
+const stripMarkdown = (text) => {
+  if (!text) return '';
+  return text
+    // Remove code blocks
+    .replace(/```[\s\S]*?```/g, '[code]')
+    // Remove inline code
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove headers
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove bold
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Remove italic
+    .replace(/\*([^*]+)\*/g, '$1')
+    // Remove strikethrough
+    .replace(/~~([^~]+)~~/g, '$1')
+    // Remove links
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove images
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    // Remove blockquotes
+    .replace(/^>\s+/gm, '')
+    // Remove list markers
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    // Remove horizontal rules
+    .replace(/^-{3,}$/gm, '')
+    // Clean up extra whitespace
+    .trim();
+};
 
 const TAG_COLORS = [
   { name: 'blue', bg: 'bg-accent-blue/20', text: 'text-accent-blue', border: 'border-accent-blue/30' },
@@ -101,13 +145,40 @@ function groupNotesByDate(notes) {
   return groups;
 }
 
-function NoteItem({ note, isSelected, onClick, index }) {
+function NoteItem({ note, isSelected, onClick, index, isDraggable = true }) {
   const { deleteNote, updateNote } = useNotesStore();
-  const preview = note.content?.substring(0, 100) || 'No content';
+  const strippedContent = stripMarkdown(note.content || '');
+  const preview = strippedContent.substring(0, 100) || 'No content';
   const date = note.updatedAt ? formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true }) : '';
 
   // Get color scheme for this note
   const noteColor = NOTE_COLORS[note.color || 'default'] || NOTE_COLORS.default;
+
+  // Drag and drop functionality (skip for pinned notes)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: note.id,
+    data: {
+      type: 'note',
+      note
+    },
+    disabled: !isDraggable || note.isPinned,
+    activationConstraint: {
+      distance: 5
+    }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1
+  };
 
   const handleDelete = () => {
     toast((t) => (
@@ -164,6 +235,8 @@ function NoteItem({ note, isSelected, onClick, index }) {
 
   return (
     <motion.div
+      ref={setNodeRef}
+      style={style}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -181,9 +254,11 @@ function NoteItem({ note, isSelected, onClick, index }) {
           whileHover={{ y: -2, transition: { duration: 0.2 } }}
           whileTap={{ scale: 0.98 }}
           onClick={onClick}
-          className={`rounded-card p-2.5 cursor-pointer transition-all duration-200 ${
+          {...attributes}
+          {...listeners}
+          className={`rounded-card p-2.5 cursor-pointer transition-all duration-200 touch-none ${
             isSelected ? `${noteColor.selected} shadow-hover` : `${noteColor.bg} hover:${noteColor.hover} hover:shadow-card`
-          }`}
+          } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         >
           <div className="flex items-start gap-2">
             <div className="flex-1 min-w-0">
@@ -223,9 +298,11 @@ function NoteItem({ note, isSelected, onClick, index }) {
         whileHover={{ y: -2, transition: { duration: 0.2 } }}
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
-        className={`hidden lg:block rounded-card p-2.5 cursor-pointer transition-all duration-200 ${
+        {...attributes}
+        {...listeners}
+        className={`hidden lg:block rounded-card p-2.5 cursor-pointer transition-all duration-200 touch-none ${
           isSelected ? `${noteColor.selected} shadow-hover` : `${noteColor.bg} hover:${noteColor.hover} hover:shadow-card`
-        }`}
+        } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       >
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
@@ -263,9 +340,81 @@ function NoteItem({ note, isSelected, onClick, index }) {
 }
 
 export default function NotesList() {
-  const { getFilteredNotes, selectedNoteId, selectNote, createNote, selectedFolderId } = useNotesStore();
+  const { getFilteredNotes, selectedNoteId, selectNote, createNote, selectedFolderId, moveNote } = useNotesStore();
   const notes = getFilteredNotes();
   const groups = groupNotesByDate(notes);
+
+  const [activeNote, setActiveNote] = useState(null);
+  const [announcement, setAnnouncement] = useState('');
+
+  // Configure sensors for drag & drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required to start drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event) => {
+    const { active } = event;
+    if (active.data.current?.type === 'note') {
+      setActiveNote(active.data.current.note);
+    }
+  };
+
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    // Only handle note dragging
+    if (activeData?.type !== 'note') return;
+
+    const activeNoteId = active.id;
+    const overNoteId = over.id;
+
+    // If dragging over another note
+    if (overData?.type === 'note') {
+      const activeNote = activeData.note;
+      const overNote = overData.note;
+
+      // Skip if dragging over a pinned note or if active note is pinned
+      if (activeNote.isPinned || overNote.isPinned) return;
+
+      // Only reorder within same folder
+      if (activeNote.folderId !== overNote.folderId) return;
+
+      if (activeNoteId !== overNoteId) {
+        const folderNotes = notes.filter(n => n.folderId === activeNote.folderId && !n.isPinned);
+        const activeIndex = folderNotes.findIndex(n => n.id === activeNoteId);
+        const overIndex = folderNotes.findIndex(n => n.id === overNoteId);
+
+        if (activeIndex !== overIndex) {
+          moveNote(activeNoteId, activeNote.folderId, overIndex);
+        }
+      }
+    }
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (over && active.data.current?.note) {
+      const note = active.data.current.note;
+      setAnnouncement(`Moved "${note.title || 'Untitled Note'}"`);
+    }
+
+    setActiveNote(null);
+
+    // Clear announcement after screen reader reads it
+    setTimeout(() => setAnnouncement(''), 1000);
+  };
 
   const handleCreateNote = async () => {
     if (!selectedFolderId) {
@@ -277,26 +426,44 @@ export default function NotesList() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {/* Pinned Section */}
-      {groups.pinned.length > 0 && (
-        <div className="mb-4">
-          <div className="px-3 py-1">
-            <p className="text-xs text-text-tertiary font-medium">📌 Pinned</p>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      {/* Screen reader announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {/* Pinned Section */}
+        {groups.pinned.length > 0 && (
+          <div className="mb-4">
+            <div className="px-3 py-1">
+              <p className="text-xs text-text-tertiary font-medium">📌 Pinned</p>
+            </div>
+            <div className="space-y-1 px-2">
+              {groups.pinned.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                  isDraggable={false}
+                />
+              ))}
+            </div>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.pinned.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
       {/* Today Section */}
       {groups.today.length > 0 && (
@@ -304,17 +471,19 @@ export default function NotesList() {
           <div className="px-3 py-1">
             <p className="text-xs text-text-tertiary font-medium">Today</p>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.today.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
+          <SortableContext items={groups.today.map(n => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1 px-2">
+              {groups.today.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
         </div>
       )}
 
@@ -324,17 +493,19 @@ export default function NotesList() {
           <div className="px-3 py-1">
             <p className="text-xs text-text-tertiary font-medium">Yesterday</p>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.yesterday.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
+          <SortableContext items={groups.yesterday.map(n => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1 px-2">
+              {groups.yesterday.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
         </div>
       )}
 
@@ -344,17 +515,19 @@ export default function NotesList() {
           <div className="px-3 py-1">
             <p className="text-xs text-text-tertiary font-medium">Previous 7 Days</p>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.previous7Days.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
+          <SortableContext items={groups.previous7Days.map(n => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1 px-2">
+              {groups.previous7Days.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
         </div>
       )}
 
@@ -364,17 +537,19 @@ export default function NotesList() {
           <div className="px-3 py-1">
             <p className="text-xs text-text-tertiary font-medium">Previous 30 Days</p>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.previous30Days.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
+          <SortableContext items={groups.previous30Days.map(n => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1 px-2">
+              {groups.previous30Days.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
         </div>
       )}
 
@@ -384,17 +559,19 @@ export default function NotesList() {
           <div className="px-3 py-1">
             <p className="text-xs text-text-tertiary font-medium">Older</p>
           </div>
-          <div className="space-y-1 px-2">
-            {groups.older.map((note, index) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                index={index}
-                isSelected={selectedNoteId === note.id}
-                onClick={() => selectNote(note.id)}
-              />
-            ))}
-          </div>
+          <SortableContext items={groups.older.map(n => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1 px-2">
+              {groups.older.map((note, index) => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  index={index}
+                  isSelected={selectedNoteId === note.id}
+                  onClick={() => selectNote(note.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
         </div>
       )}
 
@@ -454,5 +631,35 @@ export default function NotesList() {
         </button>
       </div>
     </div>
+
+    {/* Drag Overlay */}
+    <DragOverlay>
+      {activeNote ? (
+        <div className="bg-bg-panel p-2.5 rounded-card shadow-modal border-2 border-accent-yellow cursor-grabbing rotate-3">
+          <h3 className="text-sm font-bold text-text-primary truncate">
+            {activeNote.isPinned && '📌 '}{activeNote.title || 'Untitled Note'}
+          </h3>
+          <p className="text-xs text-text-secondary line-clamp-2 mt-1">
+            {stripMarkdown(activeNote.content || '').substring(0, 100) || 'No content'}
+          </p>
+          {activeNote.tags && activeNote.tags.length > 0 && (
+            <div className="flex gap-1 mt-1.5 flex-wrap">
+              {activeNote.tags.slice(0, 3).map((tag) => {
+                const colorScheme = TAG_COLORS.find(c => c.name === tag.color) || TAG_COLORS[0];
+                return (
+                  <span
+                    key={tag.name}
+                    className={`px-1.5 py-0.5 ${colorScheme.bg} ${colorScheme.text} text-xs rounded font-medium`}
+                  >
+                    {tag.name}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </DragOverlay>
+  </DndContext>
   );
 }

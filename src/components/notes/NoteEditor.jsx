@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useNotesStore } from '../../store/notesStore';
+import MarkdownEditor from './MarkdownEditor';
 
 const TAG_COLORS = [
   { name: 'blue', bg: 'bg-accent-blue/20', text: 'text-accent-blue', border: 'border-accent-blue/30' },
@@ -317,19 +318,16 @@ export default function NoteEditor() {
         </div>
       </div>
 
-      {/* Note Content */}
-      <div className="flex-1 overflow-y-auto">
-        <textarea
-          value={content}
-          onChange={handleContentChange}
-          placeholder="Start typing your note..."
-          className="w-full h-full resize-none bg-transparent text-text-secondary border-none focus:outline-none placeholder-text-tertiary leading-relaxed"
-        />
-      </div>
+      {/* Note Content - Markdown Editor */}
+      <MarkdownEditor
+        content={content}
+        onChange={handleContentChange}
+        placeholder="Start typing your note with markdown support..."
+      />
 
       {/* Auto-save indicator */}
-      <div className="mt-4 text-xs text-text-tertiary text-center">
-        Auto-saved
+      <div className="px-4 py-2 text-xs text-text-tertiary text-center border-t border-border bg-bg-elevated">
+        Auto-saved • Markdown supported
       </div>
     </div>
   );
