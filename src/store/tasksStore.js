@@ -11,9 +11,11 @@ export const useTasksStore = create((set, get) => ({
   cards: [],
   selectedBoardId: null,
   selectedCardId: null, // For card modal
+  isLoading: true,
 
   // Initialize data from localStorage
   loadData: async () => {
+    set({ isLoading: true });
     try {
       const [boards, lists, cards] = await Promise.all([
         boardsService.list(),
@@ -21,7 +23,10 @@ export const useTasksStore = create((set, get) => ({
         cardsService.list()
       ]);
 
-      set({ boards, lists, cards });
+      // Simulate network delay for better UX demonstration
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      set({ boards, lists, cards, isLoading: false });
 
       // Select first board if exists and no board selected
       if (boards.length > 0 && !get().selectedBoardId) {
@@ -29,6 +34,7 @@ export const useTasksStore = create((set, get) => ({
       }
     } catch (error) {
       console.error('Error loading tasks data:', error);
+      set({ isLoading: false });
     }
   },
 

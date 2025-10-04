@@ -3296,3 +3296,584 @@ theme: {
 **User Impact:** Very High (enables mobile usage, expands user base)
 
 ---
+
+## 12. Visual & UX Enhancement Requirements
+
+### 12.1 Overview
+Comprehensive visual polish and user experience improvements to make the app more aesthetic, intuitive, and delightful to use. Focus on smooth animations, better feedback, and modern UI patterns.
+
+**Goals:**
+- Increase visual appeal and professional polish
+- Improve perceived performance with smooth animations
+- Enhance user feedback and interaction patterns
+- Modernize UI with glassmorphism and depth effects
+- Add productivity features (keyboard shortcuts, search)
+
+---
+
+### 12.2 Animation System
+
+**Required Libraries:**
+- `framer-motion` - Production-ready animation library for React
+- Provides smooth, performant animations with minimal code
+
+**Implementation:**
+1. **List Animations**
+   - Staggered fade-in for notes list (50ms delay per item)
+   - Smooth entrance animations when switching modes
+   - Exit animations when deleting items
+
+2. **Hover Effects**
+   - Lift effect on cards (translateY: -2px, shadow increase)
+   - Smooth transitions (200-300ms duration)
+   - Scale effect on buttons (0.95 on press)
+
+3. **Modal/Sheet Animations**
+   - Slide up from bottom on mobile
+   - Fade in with backdrop blur
+   - Spring physics for natural feel
+
+4. **Micro-interactions**
+   - Checkmark animation on save
+   - Heart pulse when pinning notes
+   - Smooth color transitions
+   - Loading spinners with spring physics
+
+**Performance Considerations:**
+- Use `transform` and `opacity` only (GPU accelerated)
+- Disable animations on low-power mode
+- Reduce motion for accessibility preferences
+- Use `will-change` sparingly
+
+---
+
+### 12.3 Toast Notification System
+
+**Replace all `alert()` and `confirm()` with beautiful toasts**
+
+**Required Library:**
+- `react-hot-toast` - Lightweight, customizable toast notifications
+
+**Toast Types:**
+1. **Success** - Green accent, checkmark icon
+2. **Error** - Red accent, X icon
+3. **Warning** - Yellow accent, warning icon
+4. **Info** - Blue accent, info icon
+5. **Loading** - Spinner animation
+
+**Use Cases:**
+- Note created/deleted
+- Board created/deleted
+- Save confirmations
+- Error messages
+- Undo prompts with action button
+
+**Design:**
+- Dark theme matching app colors
+- Glassmorphism effect (backdrop-blur)
+- Slide in from top on desktop
+- Slide up from bottom on mobile
+- Auto-dismiss after 3-5 seconds
+- Swipe to dismiss gesture
+
+---
+
+### 12.4 Glassmorphism & Depth Effects
+
+**Visual Hierarchy through Layers:**
+
+**Background Layers:**
+```
+Level 0: #000000 (app background)
+Level 1: rgba(28, 28, 30, 0.8) + blur(12px) - panels
+Level 2: rgba(44, 44, 46, 0.9) + blur(16px) - elevated cards
+Level 3: rgba(60, 60, 62, 0.95) + blur(20px) - modals
+```
+
+**Implementation Areas:**
+1. **Sidebar Panels** - Semi-transparent with blur
+2. **Note/Task Cards** - Subtle blur on hover
+3. **Bottom Navigation** - Strong blur with border-top
+4. **Mobile Menu** - Full blur overlay
+5. **Modals/Sheets** - Maximum blur for focus
+6. **Floating Action Button** - Frosted glass effect
+
+**Border Highlights:**
+- Subtle gradient borders on hover
+- Colored glow on focus states
+- Border shimmer animation on new items
+
+---
+
+### 12.5 Typography Refinement
+
+**Font Weight System:**
+```
+Light (300): Timestamps, metadata
+Regular (400): Body text, descriptions
+Medium (500): Labels, secondary headings
+Semibold (600): Card titles, buttons
+Bold (700): Page headings, primary titles
+```
+
+**Letter Spacing:**
+- Headings: -0.02em (tighter)
+- Body: 0em (normal)
+- Uppercase labels: 0.05em (wider)
+
+**Text Gradients:**
+- Primary headings: Yellow to orange gradient
+- Active state text: Blue to cyan gradient
+- Accent text: Gradient on hover
+
+**Line Height:**
+- Headings: 1.2
+- Body: 1.6
+- Code/monospace: 1.4
+
+---
+
+### 12.6 Empty States
+
+**Replace plain text with illustrated empty states**
+
+**Components:**
+1. **No Notes Selected**
+   - SVG illustration (notebook icon)
+   - Heading: "No note selected"
+   - Subtext: "Select a note or create a new one"
+   - CTA button: "+ New Note"
+
+2. **Empty Folder**
+   - SVG illustration (empty folder)
+   - Heading: "This folder is empty"
+   - Subtext: "Create your first note to get started"
+   - CTA button: "Create Note"
+
+3. **No Boards**
+   - SVG illustration (kanban board icon)
+   - Heading: "No boards yet"
+   - Subtext: "Create a board to organize your tasks"
+   - CTA button: "+ New Board"
+
+4. **Empty Board**
+   - SVG illustration (checklist)
+   - Heading: "This board is empty"
+   - Subtext: "Add your first list to get organized"
+   - CTA button: "+ Add List"
+
+**Design Pattern:**
+- Centered layout
+- Muted colors (text-tertiary)
+- Icon: 48-64px size
+- Spacing: 16px between elements
+- Subtle fade-in animation
+
+---
+
+### 12.7 Loading States (Skeleton Screens)
+
+**Replace spinners with content-aware skeletons**
+
+**Skeleton Components:**
+1. **NotesList Skeleton**
+   ```
+   [■■■■■■■■■■■■■] ← Title bar
+   [■■■■■■■     ] ← Note title
+   [■■■■        ] ← Preview text
+   [■■■■■       ] ← Timestamp
+   ```
+
+2. **Board Skeleton**
+   ```
+   [■■■■■■] [■■■■■■] [■■■■■■] ← List headers
+   [■■■■  ] [■■■■  ] [■■■■  ] ← Cards
+   [■■■   ] [■■■   ] [■■■   ]
+   ```
+
+3. **Card Modal Skeleton**
+   ```
+   [■■■■■■■■■■■■■■■] ← Title
+   [■■■■■■■■■     ] ← Description
+   [■■] [■■] [■■]    ← Metadata
+   ```
+
+**Animation:**
+- Shimmer effect (left to right)
+- Pulse opacity (0.5 → 1.0 → 0.5)
+- 1.5s duration, infinite loop
+
+---
+
+### 12.8 Mobile Swipe Actions
+
+**Swipe-to-reveal actions for notes**
+
+**Implementation:**
+- Swipe left: Delete (red background)
+- Swipe right: Pin/Unpin (yellow background)
+- Threshold: 40% of card width
+- Spring animation on release
+- Haptic feedback on trigger (mobile)
+
+**Visual Feedback:**
+- Background color reveals during swipe
+- Icon appears at 20% threshold
+- Action triggers at 40% threshold
+- Smooth snap-back if threshold not met
+
+---
+
+### 12.9 Tag System
+
+**Color-coded tags with autocomplete**
+
+**Tag Colors:**
+- Red: Urgent/Important
+- Orange: Work
+- Yellow: Personal
+- Green: Ideas
+- Blue: Research
+- Purple: Learning
+- Pink: Creative
+- Gray: Archive
+
+**Features:**
+1. **Tag Input**
+   - Autocomplete dropdown
+   - Fuzzy search
+   - Create new tags inline
+   - Keyboard navigation (↑↓ to select, Enter to add)
+
+2. **Tag Display**
+   - Pill-shaped badges
+   - Colored background with matching border
+   - Remove button (×) on hover
+   - Truncate long tag names
+
+3. **Tag Filter**
+   - Click tag to filter notes/cards
+   - Multi-select with AND/OR logic
+   - Clear all filters button
+
+---
+
+### 12.10 Progress Indicators
+
+**Task List Completion Tracking**
+
+**Display:**
+1. **Progress Bar**
+   - Horizontal bar below list name
+   - Gradient fill (blue to green)
+   - Percentage text overlay
+   - Smooth animation on change
+
+2. **Card Count Badge**
+   - "5/12 cards completed"
+   - Circular progress ring
+   - Color changes: Red (0-30%), Yellow (31-70%), Green (71-100%)
+
+3. **Board Overview**
+   - Total cards across all lists
+   - Completed vs. pending
+   - Visual chart (optional)
+
+---
+
+### 12.11 Global Search (⌘K Command Palette)
+
+**Quick access to all features**
+
+**Required Library:**
+- `cmdk` - Fast, accessible command menu
+
+**Features:**
+1. **Keyboard Shortcut**
+   - ⌘K (Mac) / Ctrl+K (Windows)
+   - Opens modal overlay
+   - Fuzzy search
+
+2. **Search Scope:**
+   - Notes (title + content)
+   - Folders
+   - Boards
+   - Lists
+   - Cards
+   - Actions (Create note, New board, etc.)
+
+3. **Results Display:**
+   - Grouped by type
+   - Keyboard navigation
+   - Enter to select
+   - Escape to close
+   - Recent searches
+
+4. **Design:**
+   - Centered modal (600px wide)
+   - Glassmorphism backdrop
+   - Instant search (no debounce)
+   - Highlight matching text
+
+---
+
+### 12.12 Keyboard Shortcuts
+
+**Power user productivity features**
+
+**Global Shortcuts:**
+- `⌘K` / `Ctrl+K` - Open command palette
+- `⌘N` / `Ctrl+N` - New note/card (context-aware)
+- `⌘S` / `Ctrl+S` - Manual save (visual feedback only)
+- `⌘P` / `Ctrl+P` - Pin/unpin current note
+- `⌘Delete` / `Ctrl+Delete` - Delete current item
+- `⌘F` / `Ctrl+F` - Focus search
+- `Escape` - Close modals, clear selection
+
+**Navigation:**
+- `↑` / `↓` - Navigate lists
+- `Enter` - Open selected item
+- `⌘[` / `⌘]` - Previous/next note
+- `Tab` - Cycle through UI sections
+
+**Editor:**
+- `⌘B` / `Ctrl+B` - Bold
+- `⌘I` / `Ctrl+I` - Italic
+- `⌘U` / `Ctrl+U` - Underline
+- `⌘Shift+L` - Insert checklist
+
+**Help:**
+- `⌘/` / `Ctrl+/` - Show keyboard shortcuts cheatsheet
+
+---
+
+### 12.13 Priority Badges & Due Dates
+
+**Visual indicators for task cards**
+
+**Priority Levels:**
+1. **Urgent** - Red flag icon, bold border
+2. **High** - Orange flag icon
+3. **Medium** - Yellow flag icon (default)
+4. **Low** - Gray flag icon
+
+**Due Date Display:**
+- Inline badge with calendar icon
+- Color coding:
+  - Red: Overdue
+  - Orange: Due today
+  - Yellow: Due this week
+  - Gray: Future
+
+**Implementation:**
+- Dropdown selector in card modal
+- Quick actions in card menu
+- Filter by priority/due date
+- Sort lists by priority
+
+---
+
+### 12.14 Theme Customization
+
+**User-selectable accent colors**
+
+**Accent Color Options:**
+1. Yellow (default) - `#ffd60a`
+2. Blue - `#0a84ff`
+3. Green - `#32d74b`
+4. Purple - `#bf5af2`
+5. Pink - `#ff375f`
+6. Orange - `#ff9500`
+
+**Customization UI:**
+- Settings modal (gear icon)
+- Color picker with presets
+- Live preview
+- Save to localStorage
+- Apply to:
+  - Active buttons
+  - Selected items
+  - Progress bars
+  - Links and accents
+
+---
+
+### 12.15 Markdown Support
+
+**Rich text formatting in notes**
+
+**Required Library:**
+- `react-markdown` - Markdown renderer
+- `remark-gfm` - GitHub Flavored Markdown support
+
+**Supported Syntax:**
+- Headings (# H1, ## H2, ### H3)
+- Bold (**text**)
+- Italic (*text*)
+- Code blocks (```language```)
+- Inline code (`code`)
+- Links ([text](url))
+- Images (![alt](url))
+- Lists (-, *, 1.)
+- Checkboxes (- [ ] Task)
+- Blockquotes (>)
+- Horizontal rules (---)
+
+**Editor Features:**
+- Live preview toggle
+- Syntax highlighting in code blocks
+- Keyboard shortcuts for formatting
+- Markdown toolbar buttons
+
+---
+
+### 12.16 Implementation Checklist
+
+**Phase 1: Foundation (Tasks 1-3)**
+- [ ] Install framer-motion, react-hot-toast
+- [ ] Enhance Tailwind config (glassmorphism, gradients, animations)
+- [ ] Replace all alert/confirm with toast notifications
+
+**Phase 2: Visual Impact (Tasks 4-9)**
+- [ ] Add stagger animations to NotesList
+- [ ] Implement hover lift effects on cards
+- [ ] Create illustrated empty states
+- [ ] Add glassmorphism to panels/modals
+- [ ] Implement skeleton loading screens
+- [ ] Refine typography system
+
+**Phase 3: UX Enhancements (Tasks 10-15)**
+- [ ] Add swipe actions for mobile notes
+- [ ] Create tag system with autocomplete
+- [ ] Add progress indicators to task lists
+- [ ] Implement ⌘K command palette
+- [ ] Add keyboard shortcuts
+- [ ] Add priority badges and due dates
+
+**Phase 4: Advanced Features (Tasks 16-17)**
+- [ ] Implement theme customization
+- [ ] Add markdown rendering
+
+**Phase 5: Quality Assurance (Tasks 18-19)**
+- [ ] Run full test suite
+- [ ] Test on multiple devices
+- [ ] Deploy to Vercel
+
+---
+
+### 12.17 Technical Requirements
+
+**Dependencies to Add:**
+```json
+{
+  "framer-motion": "^11.x",
+  "react-hot-toast": "^2.x",
+  "cmdk": "^1.x",
+  "react-markdown": "^9.x",
+  "remark-gfm": "^4.x"
+}
+```
+
+**Tailwind Extensions:**
+```js
+// Glassmorphism utilities
+backdropBlur: ['sm', 'md', 'lg', 'xl']
+backdropSaturate: [100, 150, 200]
+backgroundOpacity: [80, 85, 90, 95]
+
+// Animation utilities
+transitionDuration: [150, 200, 300, 500]
+transitionTimingFunction: {
+  'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)'
+}
+```
+
+---
+
+### 12.18 Success Metrics
+
+**Visual Enhancement is successful when:**
+- ✅ All animations run at 60fps
+- ✅ No layout shifts or jank
+- ✅ Toast notifications replace all alerts
+- ✅ Empty states are engaging and helpful
+- ✅ Keyboard shortcuts work reliably
+- ✅ Search returns results in <100ms
+- ✅ Theme changes apply instantly
+- ✅ Markdown renders correctly
+- ✅ Mobile swipe gestures feel natural
+- ✅ Tags are easy to create and filter
+
+**User Feedback Indicators:**
+- Increased time on app
+- Higher engagement with features
+- Positive aesthetic feedback
+- Reduced bounce rate
+- Increased mobile usage
+
+---
+
+### 12.19 Accessibility Considerations
+
+**Animations:**
+- Respect `prefers-reduced-motion`
+- Provide option to disable animations
+- Never rely solely on color
+
+**Keyboard Navigation:**
+- All shortcuts documented
+- Focus indicators always visible
+- Tab order logical
+- Skip links for long lists
+
+**Screen Readers:**
+- ARIA labels for all shortcuts
+- Announce toast notifications
+- Describe empty state illustrations
+- Tag colors have text labels
+
+---
+
+### 12.20 Performance Budgets
+
+**Animation Performance:**
+- Frame rate: 60fps minimum
+- Layout shift: <0.1 CLS
+- Animation duration: <500ms max
+
+**Bundle Size Impact:**
+- framer-motion: ~50KB gzipped
+- react-hot-toast: ~3KB gzipped
+- cmdk: ~8KB gzipped
+- react-markdown: ~25KB gzipped
+- **Total addition: ~86KB** (acceptable)
+
+**Load Time:**
+- Initial load: <3s (no change)
+- Code splitting for markdown (lazy load)
+
+---
+
+## Summary: Visual & UX Enhancement Requirements
+
+**What's Required:**
+1. ✅ Install 4 new libraries (framer-motion, react-hot-toast, cmdk, react-markdown)
+2. ✅ Enhance Tailwind config with new utilities
+3. ✅ Create 5 new components (EmptyStates, SkeletonLoaders, ToastProvider, CommandPalette, ThemePicker)
+4. ✅ Modify 12 existing components with animations and visual polish
+5. ✅ Implement keyboard shortcuts system
+6. ✅ Add tag and priority systems
+7. ✅ Test animations and accessibility
+
+**What's NOT Required:**
+- ❌ No backend changes
+- ❌ No data migration
+- ❌ No breaking changes to existing features
+- ❌ No major architectural changes
+
+**Estimated Time:** 12-15 hours total
+**Risk Level:** Low-Medium (purely additive, can be rolled back)
+**User Impact:** Very High (significantly improves UX and visual appeal)
+
+---

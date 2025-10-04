@@ -4,14 +4,28 @@ import MobileMenu from '../layout/MobileMenu';
 import FolderSelector from './FolderSelector';
 import NotesList from './NotesList';
 import NoteEditor from './NoteEditor';
+import { NotesSkeleton, NoteEditorSkeleton } from '../ui/Skeleton';
 
 export default function NotesView() {
-  const { loadData, searchQuery, setSearchQuery } = useNotesStore();
+  const { loadData, searchQuery, setSearchQuery, isLoading } = useNotesStore();
 
   // Load data from localStorage on mount
   useEffect(() => {
     loadData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex bg-bg-app text-text-primary">
+        <MobileMenu title="Notes">
+          <NotesSkeleton />
+        </MobileMenu>
+        <div className="flex-1 bg-bg-app">
+          <NoteEditorSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex bg-bg-app text-text-primary">

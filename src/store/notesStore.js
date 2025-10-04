@@ -10,16 +10,21 @@ export const useNotesStore = create((set, get) => ({
   selectedFolderId: null,
   selectedNoteId: null,
   searchQuery: '',
+  isLoading: true,
 
   // Initialize data from localStorage
   loadData: async () => {
+    set({ isLoading: true });
     try {
       const [folders, notes] = await Promise.all([
         foldersService.list(),
         notesService.list()
       ]);
 
-      set({ folders, notes });
+      // Simulate network delay for better UX demonstration
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      set({ folders, notes, isLoading: false });
 
       // Select first folder if exists and no folder selected
       if (folders.length > 0 && !get().selectedFolderId) {
@@ -27,6 +32,7 @@ export const useNotesStore = create((set, get) => ({
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      set({ isLoading: false });
     }
   },
 

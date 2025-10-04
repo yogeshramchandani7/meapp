@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNotesStore } from '../../store/notesStore';
 
 export default function FolderSelector() {
@@ -17,9 +18,30 @@ export default function FolderSelector() {
 
   const handleDeleteFolder = async (id, e) => {
     e.stopPropagation();
-    if (confirm('Delete this folder and all its notes?')) {
-      await deleteFolder(id);
-    }
+
+    toast((t) => (
+      <div className="flex items-center gap-3">
+        <span>Delete folder and all notes?</span>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              await deleteFolder(id);
+              toast.dismiss(t.id);
+              toast.success('Folder deleted');
+            }}
+            className="px-3 py-1 bg-accent-red text-white rounded-button text-sm hover:bg-accent-red/80 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-bg-elevated text-text-primary rounded-button text-sm hover:bg-bg-hover transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   return (

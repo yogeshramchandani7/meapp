@@ -2,7 +2,7 @@ import { StickyNote, CheckSquare, Plus } from 'lucide-react';
 
 export default function BottomNav({ currentMode, onModeChange, onQuickAdd }) {
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-bg-panel border-t border-border z-50">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-bg-glass-heavy backdrop-blur-xl border-t border-border/50 z-50 shadow-lg">
       <div
         className="flex justify-around items-center h-16 px-2"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

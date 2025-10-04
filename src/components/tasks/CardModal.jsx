@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useTasksStore } from '../../store/tasksStore';
 
 export default function CardModal() {
@@ -49,15 +50,35 @@ export default function CardModal() {
   };
 
   const handleDelete = async () => {
-    if (confirm(`Delete card "${card.title}"?`)) {
-      await deleteCard(card.id);
-      handleClose();
-    }
+    toast((t) => (
+      <div className="flex items-center gap-3">
+        <span>Delete "{card.title}"?</span>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              await deleteCard(card.id);
+              handleClose();
+              toast.dismiss(t.id);
+              toast.success('Card deleted');
+            }}
+            className="px-3 py-1 bg-accent-red text-white rounded-button text-sm hover:bg-accent-red/80 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-bg-elevated text-text-primary rounded-button text-sm hover:bg-bg-hover transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-bg-elevated rounded-modal shadow-modal max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-bg-glass-heavy backdrop-blur-xl rounded-modal shadow-modal border border-border/30 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-start justify-between">

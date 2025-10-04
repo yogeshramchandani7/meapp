@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { motion } from 'framer-motion';
 import { useTasksStore } from '../../store/tasksStore';
 
 export default function Card({ card }) {
@@ -73,7 +74,7 @@ export default function Card({ card }) {
 
   return (
     <>
-      <div
+      <motion.div
         ref={setNodeRef}
         style={style}
         {...attributes}
@@ -86,7 +87,9 @@ export default function Card({ card }) {
         tabIndex={0}
         aria-label={`Card: ${card.title}. Press space to drag and move with arrow keys.`}
         aria-pressed={isDragging}
-        className="bg-bg-panel p-3 md:p-2 mb-3 md:mb-2 min-h-[56px] rounded-card shadow-card border border-border hover:bg-bg-hover active:scale-95 transition-all touch-none"
+        whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)', transition: { duration: 0.2 } }}
+        whileTap={{ scale: 0.98 }}
+        className="bg-bg-panel p-3 md:p-2 mb-3 md:mb-2 min-h-[56px] rounded-card shadow-card border border-border hover:bg-bg-hover transition-all duration-200 touch-none"
       >
         <p className="text-sm font-medium text-text-primary">{card.title}</p>
         {card.tags && card.tags.length > 0 && (
@@ -101,7 +104,7 @@ export default function Card({ card }) {
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Mobile Context Menu (Bottom Sheet) */}
       {showContextMenu && (
@@ -109,11 +112,11 @@ export default function Card({ card }) {
           {/* Overlay */}
           <div
             onClick={() => setShowContextMenu(false)}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
 
           {/* Bottom Sheet Menu */}
-          <div className="fixed bottom-0 inset-x-0 bg-bg-panel border-t border-border rounded-t-modal z-50 animate-slide-up">
+          <div className="fixed bottom-0 inset-x-0 bg-bg-glass-heavy backdrop-blur-xl border-t border-border/50 rounded-t-modal z-50 animate-slide-up shadow-2xl">
             <div className="p-4">
               <h3 className="text-lg font-semibold text-text-primary mb-4">{card.title}</h3>
               <button

@@ -21,7 +21,7 @@ export default function MobileMenu({ children, title }) {
           fixed lg:static inset-y-0 left-0 z-40
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          w-64 lg:w-64 bg-bg-panel border-r border-border
+          w-64 lg:w-64 bg-bg-glass-medium lg:bg-bg-panel backdrop-blur-xl border-r border-border/50 shadow-lg
           flex flex-col
         `}
       >
@@ -40,7 +40,7 @@ export default function MobileMenu({ children, title }) {
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
           aria-hidden="true"
         />
       )}

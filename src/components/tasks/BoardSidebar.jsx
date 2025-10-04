@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useTasksStore } from '../../store/tasksStore';
 
 export default function BoardSidebar() {
@@ -17,9 +18,30 @@ export default function BoardSidebar() {
 
   const handleDeleteBoard = async (id, name, e) => {
     e.stopPropagation();
-    if (confirm(`Delete board "${name}" and all its lists and cards?`)) {
-      await deleteBoard(id);
-    }
+
+    toast((t) => (
+      <div className="flex items-center gap-3">
+        <span>Delete "{name}" and all contents?</span>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              await deleteBoard(id);
+              toast.dismiss(t.id);
+              toast.success('Board deleted');
+            }}
+            className="px-3 py-1 bg-accent-red text-white rounded-button text-sm hover:bg-accent-red/80 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-bg-elevated text-text-primary rounded-button text-sm hover:bg-bg-hover transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   return (

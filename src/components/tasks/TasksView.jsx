@@ -9,15 +9,17 @@ import {
   useSensors
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { motion } from 'framer-motion';
 import { useTasksStore } from '../../store/tasksStore';
 import MobileMenu from '../layout/MobileMenu';
 import BoardSidebar from './BoardSidebar';
 import List from './List';
 import Card from './Card';
 import CardModal from './CardModal';
+import { TasksSkeleton } from '../ui/Skeleton';
 
 export default function TasksView() {
-  const { loadData, boards, selectedBoardId, getListsForBoard, createList, moveCard, getCardsForList } = useTasksStore();
+  const { loadData, boards, selectedBoardId, getListsForBoard, createList, moveCard, getCardsForList, isLoading } = useTasksStore();
   const [showAddList, setShowAddList] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [activeCard, setActiveCard] = useState(null);
@@ -127,6 +129,23 @@ export default function TasksView() {
     setShowAddList(false);
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-full flex">
+        <MobileMenu title="Boards">
+          <div className="p-4 space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-bg-elevated rounded-card animate-pulse"></div>
+            ))}
+          </div>
+        </MobileMenu>
+        <div className="flex-1 bg-bg-app">
+          <TasksSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -155,7 +174,7 @@ export default function TasksView() {
         <div className="flex-1 bg-bg-app overflow-x-auto">
           {selectedBoard ? (
             <div className="p-4 md:p-6">
-              <h1 className="text-xl md:text-2xl font-bold text-text-primary mb-4 md:mb-6">{selectedBoard.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight mb-4 md:mb-6">{selectedBoard.name}</h1>
 
               {/* Lists Container - Horizontal scroll with snap points for mobile */}
               <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
@@ -212,27 +231,115 @@ export default function TasksView() {
 
               {/* Empty State - No Lists */}
               {lists.length === 0 && !showAddList && (
-                <div className="text-center py-12">
-                  <p className="text-text-secondary text-lg mb-4">This board is empty</p>
-                  <p className="text-text-tertiary text-sm mb-6">Create your first list to get started</p>
-                  <button
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-center py-12"
+                >
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="mb-6"
+                  >
+                    <div className="text-7xl mb-4">📋</div>
+                    <div className="relative inline-block">
+                      <div className="absolute inset-0 bg-accent-blue/20 blur-xl rounded-full"></div>
+                      <h3 className="relative text-xl font-bold text-text-primary mb-2">This board is empty</h3>
+                    </div>
+                  </motion.div>
+                  <p className="text-text-secondary mb-6">Create your first list to start organizing tasks</p>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex flex-col gap-2 text-text-tertiary text-sm mb-8"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-accent-blue">📝</span>
+                      <span>Create lists for different workflows</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-accent-yellow">✨</span>
+                      <span>Drag & drop to organize</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-accent-green">✓</span>
+                      <span>Track progress visually</span>
+                    </div>
+                  </motion.div>
+                  <motion.button
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAddList(true)}
-                    className="px-6 py-3 bg-accent-blue text-white rounded-button hover:bg-accent-blue/80 font-medium"
+                    className="px-6 py-3 bg-accent-blue text-white rounded-button hover:bg-accent-blue/80 font-medium shadow-lg hover:shadow-xl transition-shadow"
                   >
                     + Add a list
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               )}
             </div>
           ) : (
             /* Empty State - No Board Selected */
             <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-text-secondary text-xl mb-2">No board selected</p>
-                <p className="text-text-tertiary text-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center px-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="mb-6"
+                >
+                  <div className="text-8xl mb-4">🎯</div>
+                  <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-accent-yellow/20 blur-xl rounded-full"></div>
+                    <h3 className="relative text-2xl font-bold text-text-primary mb-2">
+                      {boards.length === 0 ? 'Welcome to Tasks' : 'No board selected'}
+                    </h3>
+                  </div>
+                </motion.div>
+                <p className="text-text-secondary text-lg mb-8">
                   {boards.length === 0 ? 'Create your first board to get started' : 'Select a board from the sidebar'}
                 </p>
-              </div>
+                {boards.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex flex-col gap-3 text-text-tertiary text-sm max-w-md mx-auto"
+                  >
+                    <div className="flex items-center gap-3 bg-bg-panel p-4 rounded-card">
+                      <span className="text-3xl">📊</span>
+                      <div className="text-left">
+                        <p className="font-semibold text-text-primary">Organize Projects</p>
+                        <p className="text-xs">Create boards for different projects or teams</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-bg-panel p-4 rounded-card">
+                      <span className="text-3xl">🚀</span>
+                      <div className="text-left">
+                        <p className="font-semibold text-text-primary">Track Progress</p>
+                        <p className="text-xs">Move cards through lists to visualize workflow</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-bg-panel p-4 rounded-card">
+                      <span className="text-3xl">🤝</span>
+                      <div className="text-left">
+                        <p className="font-semibold text-text-primary">Collaborate</p>
+                        <p className="text-xs">Share boards and work together seamlessly</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
           )}
         </div>
