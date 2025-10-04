@@ -6,6 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',    // iPhone SE
+        'sm': '640px',    // Small devices
+        'md': '768px',    // Tablets
+        'lg': '1024px',   // Desktop
+        'xl': '1280px',   // Large desktop
+        '2xl': '1536px',  // Extra large
+      },
       colors: {
         bg: {
           app: '#000000',
@@ -42,6 +50,9 @@ export default {
         card: '0 1px 3px rgba(0, 0, 0, 0.3)',
         modal: '0 10px 40px rgba(0, 0, 0, 0.5)',
         hover: '0 4px 12px rgba(0, 0, 0, 0.4)',
+      },
+      spacing: {
+        'safe-bottom': 'env(safe-area-inset-bottom)',
       },
     },
   },

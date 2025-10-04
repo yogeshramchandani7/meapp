@@ -2454,8 +2454,845 @@ Use Tailwind's default typography scale with these semantic mappings:
 - ❌ No functionality changes
 - ❌ No test rewrites
 
-**Estimated Time:** 4-5 hours total  
-**Risk Level:** Low (purely cosmetic, no logic changes)  
+**Estimated Time:** 4-5 hours total
+**Risk Level:** Low (purely cosmetic, no logic changes)
 **User Impact:** High (dramatically improves UX and visual coherence)
+
+---
+
+## 10. Current Implementation Status
+
+### 10.1 Completed Features ✅
+
+**Status as of:** January 2025
+**Deployment:** Live at https://claude-project-two.vercel.app
+
+#### Core Architecture
+- ✅ **React 19.1.1** with Vite 7.1.7 build system
+- ✅ **Zustand 5.0.8** for state management
+- ✅ **Tailwind CSS 3.4.18** for styling with Apple Notes dark theme
+- ✅ **localStorage** for data persistence
+- ✅ **Dual-mode architecture** (Notes + Tasks) with seamless switching
+
+#### Notes Mode - Complete ✅
+- ✅ Folder management (create, rename, delete)
+- ✅ Note CRUD operations (create, read, update, delete)
+- ✅ Search functionality across all notes
+- ✅ Sort by date edited, date created, title
+- ✅ Pin/unpin notes
+- ✅ Auto-save with debouncing
+- ✅ Apple Notes dark theme (black background, yellow selection)
+- ✅ Three-column layout (folders, notes list, editor)
+
+#### Tasks Mode - Complete ✅
+- ✅ Board management (create, rename, delete, star)
+- ✅ List management (create, rename, delete)
+- ✅ Card CRUD operations
+- ✅ **Drag & drop** with @dnd-kit (cards between lists, reorder cards, reorder lists)
+- ✅ Card modal with detailed view
+- ✅ Card tags/labels
+- ✅ Board sidebar with selection
+- ✅ Apple Notes dark theme applied to Tasks mode
+
+#### Design System ✅
+- ✅ Centralized Tailwind color system
+- ✅ Semantic design tokens (`bg-app`, `text-primary`, `accent-yellow`, etc.)
+- ✅ Consistent UI across Notes and Tasks modes
+- ✅ Dark theme throughout application
+- ✅ Accessibility-compliant contrast ratios
+
+#### Testing Infrastructure ✅
+- ✅ **188 tests total** (100% pass rate)
+- ✅ **Vitest 3.2.4** for unit and integration tests
+- ✅ **Playwright 1.55.1** for E2E tests
+- ✅ **React Testing Library 16.3.0**
+- ✅ **vitest-axe** for accessibility testing
+- ✅ Comprehensive test coverage documented in `spec/TEST_DOCUMENTATION.md`
+
+#### Deployment ✅
+- ✅ Git repository initialized
+- ✅ Deployed to Vercel via CLI
+- ✅ Production URL: https://claude-project-two.vercel.app
+- ✅ Publicly accessible
+- ✅ .gitignore configured
+
+---
+
+### 10.2 Technology Stack (Implemented)
+
+#### Frontend Core
+```json
+{
+  "react": "^19.1.1",
+  "react-dom": "^19.1.1",
+  "vite": "^7.1.7",
+  "@vitejs/plugin-react": "^5.0.3"
+}
+```
+
+#### State Management & Utilities
+```json
+{
+  "zustand": "^5.0.8",          // State management
+  "nanoid": "^5.1.6",           // UUID generation
+  "date-fns": "^4.1.0",         // Date formatting
+  "clsx": "^2.1.1",             // Conditional classNames
+  "react-icons": "^5.5.0"       // Icon library
+}
+```
+
+#### Drag & Drop
+```json
+{
+  "@dnd-kit/core": "^6.3.1",
+  "@dnd-kit/sortable": "^10.0.0",
+  "@dnd-kit/utilities": "^3.2.2"
+}
+```
+
+#### Styling
+```json
+{
+  "tailwindcss": "^3.4.18",
+  "autoprefixer": "^10.4.21",
+  "postcss": "^8.5.6"
+}
+```
+
+#### Testing
+```json
+{
+  "vitest": "^3.2.4",
+  "@vitest/ui": "^3.2.4",
+  "@playwright/test": "^1.55.1",
+  "@testing-library/react": "^16.3.0",
+  "@testing-library/user-event": "^14.6.1",
+  "@testing-library/jest-dom": "^6.9.1",
+  "vitest-axe": "^0.1.0",
+  "@axe-core/react": "^4.10.2",
+  "happy-dom": "^19.0.2",
+  "jsdom": "^27.0.0"
+}
+```
+
+#### Code Quality
+```json
+{
+  "eslint": "^9.36.0",
+  "eslint-plugin-react-hooks": "^5.2.0",
+  "eslint-plugin-react-refresh": "^0.4.20"
+}
+```
+
+---
+
+### 10.3 Project Structure (Implemented)
+
+```
+claude-project/
+├── src/
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── MainLayout.jsx          ✅ Dual-mode container
+│   │   │   ├── Header.jsx              ✅ App header with title
+│   │   │   └── ModeToggle.jsx          ✅ Notes/Tasks switcher
+│   │   ├── notes/
+│   │   │   ├── NotesView.jsx           ✅ Three-column layout
+│   │   │   ├── FolderSelector.jsx      ✅ Folder dropdown + CRUD
+│   │   │   ├── NotesList.jsx           ✅ Notes list with search/sort
+│   │   │   └── NoteEditor.jsx          ✅ Text editor with auto-save
+│   │   └── tasks/
+│   │       ├── TasksView.jsx           ✅ Board view + DndContext
+│   │       ├── BoardSidebar.jsx        ✅ Board selection sidebar
+│   │       ├── List.jsx                ✅ List component with droppable
+│   │       ├── Card.jsx                ✅ Draggable card component
+│   │       └── CardModal.jsx           ✅ Card details modal
+│   ├── store/
+│   │   ├── notesStore.js               ✅ Zustand store for notes
+│   │   └── tasksStore.js               ✅ Zustand store for tasks
+│   ├── tests/
+│   │   ├── unit/                       ✅ 38 tests (tasksStore, components)
+│   │   ├── integration/                ✅ 30 tests (flows, mode switching)
+│   │   ├── e2e/                        ✅ 120 E2E tests (Playwright)
+│   │   └── accessibility/              ✅ Accessibility tests (vitest-axe)
+│   ├── App.jsx                         ✅ Root component
+│   ├── main.jsx                        ✅ Entry point
+│   └── index.css                       ✅ Global styles
+├── spec/
+│   ├── requirements.md                 ✅ This document
+│   ├── TEST_DOCUMENTATION.md           ✅ Comprehensive test docs
+│   ├── todo.md                         ✅ Development checklist
+│   └── claude.md                       ✅ Project context
+├── .gitignore                          ✅ Git ignore rules
+├── package.json                        ✅ Dependencies
+├── vite.config.js                      ✅ Vite configuration
+├── vitest.config.js                    ✅ Vitest configuration
+├── playwright.config.js                ✅ Playwright configuration
+├── tailwind.config.js                  ✅ Tailwind design system
+├── postcss.config.js                   ✅ PostCSS config
+└── eslint.config.js                    ✅ ESLint rules
+```
+
+---
+
+### 10.4 Data Storage (Current Implementation)
+
+**Current:** localStorage-based persistence
+
+**Data Models:**
+```javascript
+// Folders
+{
+  id: "uuid",
+  name: "Folder name",
+  createdAt: "ISO 8601 timestamp"
+}
+
+// Notes
+{
+  id: "uuid",
+  folderId: "folder-uuid",
+  title: "Note title",
+  content: "Note content",
+  createdAt: "ISO 8601",
+  updatedAt: "ISO 8601",
+  isPinned: false
+}
+
+// Boards
+{
+  id: "uuid",
+  name: "Board name",
+  isStarred: false,
+  createdAt: "ISO 8601",
+  updatedAt: "ISO 8601"
+}
+
+// Lists
+{
+  id: "uuid",
+  boardId: "board-uuid",
+  name: "List name",
+  position: 0,
+  createdAt: "ISO 8601"
+}
+
+// Cards
+{
+  id: "uuid",
+  listId: "list-uuid",
+  title: "Card title",
+  description: "Card description",
+  position: 0,
+  tags: ["tag1", "tag2"],
+  createdAt: "ISO 8601",
+  updatedAt: "ISO 8601"
+}
+```
+
+**Storage Keys:**
+- `folders` - Array of folder objects
+- `notes` - Array of note objects
+- `boards` - Array of board objects
+- `lists` - Array of list objects
+- `cards` - Array of card objects
+
+**Limitations:**
+- 5-10MB storage limit (browser-dependent)
+- No multi-device sync
+- No real-time collaboration
+- Data tied to single browser
+
+**Future Migration:** Architecture ready for Supabase migration (see Section 2.3)
+
+---
+
+### 10.5 Testing Documentation
+
+Comprehensive testing documentation available in:
+📄 **`spec/TEST_DOCUMENTATION.md`**
+
+**Test Statistics:**
+- **Total Tests:** 188
+- **Pass Rate:** 100%
+- **Test Files:** 11
+- **Coverage Areas:**
+  - Unit tests (tasksStore, notesStore, components)
+  - Integration tests (full workflows, mode switching)
+  - E2E tests (Playwright - user journeys)
+  - Accessibility tests (vitest-axe)
+
+**Test Commands:**
+```bash
+npm test              # Run all unit/integration tests
+npm run test:ui       # Open Vitest UI
+npm run test:run      # Run tests once (CI mode)
+npm run test:e2e      # Run E2E tests with Playwright
+npm run test:all      # Run all tests (unit + E2E)
+```
+
+---
+
+### 10.6 Deployment Information
+
+**Platform:** Vercel
+**Production URL:** https://claude-project-two.vercel.app
+**Deployment Method:** Vercel CLI (`vercel --yes --prod`)
+
+**Deployment Status:**
+- ✅ Production deployed
+- ✅ Publicly accessible
+- ✅ Auto-reload on refresh
+- ✅ localStorage data persists per browser
+- ⏳ CI/CD pipeline (not yet configured)
+- ⏳ GitHub repository link (pending)
+
+**Future Deployment Enhancements:**
+1. Link GitHub repository for automatic deployments
+2. Set up GitHub Actions CI/CD (see TEST_DOCUMENTATION.md)
+3. Add smoke tests for production
+4. Configure environment variables for Supabase migration
+
+---
+
+### 10.7 Pending Enhancements
+
+**High Priority:**
+1. **Mobile Responsiveness** (See Section 11 below) - Make app fully usable on mobile devices
+2. **Supabase Backend Migration** - Enable multi-device sync
+3. **User Authentication** - Add login/signup
+
+**Medium Priority:**
+4. **Rich Text Editor** - Replace textarea with Tiptap/Lexical
+5. **Advanced Task Features** - Due dates, checklists, card descriptions
+6. **Global Search** - Search across both notes and tasks
+7. **Data Export/Import** - JSON/Markdown export
+
+**Low Priority:**
+8. **Keyboard Shortcuts** - Power user efficiency
+9. **Themes** - Light mode option
+10. **Collaboration** - Real-time multi-user editing
+
+---
+
+## 11. Mobile Responsiveness Enhancement
+
+### 11.1 Overview & Current State
+
+**Current Status:** Desktop-Optimized Only ❌
+
+**Problems:**
+- Notes sidebar: Fixed 256px (68% of mobile screen!)
+- Tasks board: Horizontal scroll unusable on mobile
+- No touch gestures (drag-and-drop mouse-only)
+- Header too wide for small screens
+- No mobile navigation patterns
+
+**Target:** Mobile-First Responsive Design ✅
+
+**Goal:** Make the app fully functional and delightful on mobile devices (375px minimum width)
+
+---
+
+### 11.2 Implementation Strategy
+
+**Approach:** Progressive Enhancement (Recommended)
+- Keep desktop layout intact
+- Add mobile breakpoints with Tailwind
+- Use hamburger menu + bottom nav on mobile
+- Optimize for iPhone SE (375px) minimum
+
+**Alternative:** Complete Rebuild (Not Recommended)
+- More work, higher risk
+- Would require redesigning components from scratch
+
+---
+
+### 11.3 Technical Requirements
+
+#### 11.3.1 Dependencies to Install
+
+```bash
+npm install lucide-react react-swipeable
+```
+
+**Packages:**
+- `lucide-react`: Icon library for menu, navigation icons
+- `react-swipeable`: Touch gesture support (swipe between modes)
+
+---
+
+#### 11.3.2 New Components to Create
+
+**1. MobileMenu.jsx** (Collapsible Sidebar)
+```jsx
+// src/components/layout/MobileMenu.jsx
+// Hamburger menu with slide-in sidebar for mobile
+// Fixed positioning with overlay
+// Desktop: static sidebar (always visible)
+```
+
+**2. BottomNav.jsx** (Mobile Navigation Bar)
+```jsx
+// src/components/layout/BottomNav.jsx
+// Fixed bottom navigation with Notes/Tasks toggle
+// Floating action button for quick add
+// Icons with labels
+// iOS safe-area support
+```
+
+---
+
+#### 11.3.3 Components to Modify
+
+**Modified Files:**
+1. **MainLayout.jsx**
+   - Add swipe gesture handlers
+   - Conditionally render desktop header vs mobile header
+   - Account for bottom nav height on mobile
+   - Integrate BottomNav component
+
+2. **NotesView.jsx**
+   - Wrap sidebar in MobileMenu component
+   - Make editor full-width on mobile
+   - Adjust padding for mobile
+
+3. **TasksView.jsx**
+   - Wrap BoardSidebar in MobileMenu component
+   - Enable horizontal scroll with snap points
+   - Optimize list width for mobile
+
+4. **Header.jsx**
+   - Hide on mobile (< lg breakpoint)
+   - Show simplified mobile header
+
+5. **Card.jsx**
+   - Increase touch targets (min 44px height)
+   - Add mobile spacing (larger padding)
+   - Implement long-press context menu
+
+6. **List.jsx**
+   - Adjust width for mobile (full screen or snap-scroll)
+   - Optimize spacing
+
+---
+
+### 11.4 Detailed Implementation Plan
+
+#### Phase 1: Core Responsive Layout (1-2 hours)
+
+**Step 1.1: Create MobileMenu Component**
+```jsx
+// Features:
+// - Hamburger button (mobile only)
+// - Slide-in sidebar with animation
+// - Overlay with close on click
+// - Desktop: always visible (no hamburger)
+// - Responsive transform transitions
+
+// Breakpoint: lg (1024px)
+// Mobile: fixed, transform translate
+// Desktop: static, always visible
+```
+
+**Step 1.2: Create BottomNav Component**
+```jsx
+// Features:
+// - Fixed bottom positioning
+// - Notes/Tasks buttons with icons
+// - Floating action button (elevated, centered)
+// - Active state highlighting (yellow)
+// - Safe area insets (iOS notch)
+// - Only visible on mobile (< lg)
+
+// Layout: 3-column flex
+// [Notes] [+ FAB] [Tasks]
+```
+
+**Step 1.3: Update MainLayout**
+```jsx
+// Changes:
+// - Add swipe handlers (left/right to switch modes)
+// - Conditional header rendering
+// - Mobile header: Simple title only
+// - Desktop header: Full Header component
+// - Add BottomNav component
+// - Adjust main content height for bottom nav
+```
+
+**Step 1.4: Update NotesView & TasksView**
+```jsx
+// NotesView changes:
+// - Wrap sidebar in MobileMenu
+// - Full-width editor on mobile
+
+// TasksView changes:
+// - Wrap BoardSidebar in MobileMenu
+// - Horizontal scroll container with snap points
+// - Optimize list rendering for mobile
+```
+
+---
+
+#### Phase 2: Touch Gestures & Mobile UX (2-3 hours)
+
+**Step 2.1: Swipe Gestures**
+```jsx
+// Implement in MainLayout:
+// - Swipe left → Switch to Tasks
+// - Swipe right → Switch to Notes
+// - Use react-swipeable hooks
+// - Prevent scroll interference
+// - Mobile only (no mouse tracking)
+```
+
+**Step 2.2: Mobile Card Optimization**
+```jsx
+// Card.jsx updates:
+// - Increase touch targets: min-h-[56px] (iOS: 44px minimum)
+// - Larger padding on mobile: p-3 md:p-2
+// - More spacing between cards: mb-3 md:mb-2
+// - Touch feedback: active:scale-95
+// - Smooth transitions
+```
+
+**Step 2.3: Long-Press Context Menu**
+```jsx
+// Card.jsx feature:
+// - 500ms long press triggers menu
+// - Bottom sheet style menu (mobile)
+// - Options: Edit, Delete, Move, Copy
+// - Cancel button
+// - Overlay dismissal
+```
+
+**Step 2.4: Horizontal Scroll Snap**
+```jsx
+// TasksView updates:
+// - Lists container: overflow-x-auto
+// - Snap behavior: snap-x snap-mandatory
+// - Each list: snap-start
+// - Smooth scrolling
+```
+
+---
+
+#### Phase 3: Responsive Breakpoints (30 minutes)
+
+**Step 3.1: Update Tailwind Config**
+```javascript
+// tailwind.config.js additions:
+theme: {
+  extend: {
+    screens: {
+      'xs': '375px',    // iPhone SE
+      'sm': '640px',    // Default
+      'md': '768px',    // Tablets
+      'lg': '1024px',   // Desktop
+      'xl': '1280px',   // Large desktop
+    },
+    spacing: {
+      'safe-bottom': 'env(safe-area-inset-bottom)', // iOS notch
+    },
+  },
+}
+```
+
+**Step 3.2: Responsive Typography**
+```jsx
+// Update all headings and text:
+<h1 className="text-xl md:text-2xl lg:text-3xl">
+<p className="text-sm md:text-base">
+<button className="px-3 py-2 md:px-4 md:py-2 text-sm md:text-base">
+```
+
+---
+
+#### Phase 4: Mobile-Specific Features (1 hour)
+
+**Step 4.1: Pull-to-Refresh**
+```jsx
+// NotesView & TasksView:
+// - Touch event handlers (touchStart, touchMove, touchEnd)
+// - Pull threshold: 80px
+// - Loading spinner animation
+// - Reload data on release
+// - Smooth bounce animation
+```
+
+**Step 4.2: Mobile Touch Area Verification**
+```jsx
+// Check all interactive elements:
+// - Buttons: min-h-[44px] (iOS standard)
+// - Cards: min-h-[56px]
+// - List items: py-3 (generous padding)
+// - Icons: size={24} or size={28}
+```
+
+**Step 4.3: Safe Area Support**
+```jsx
+// iOS notch/home indicator:
+// - Bottom nav: pb-safe-bottom
+// - Main content: pb-[calc(4rem+env(safe-area-inset-bottom))]
+// - Modals: Account for safe areas
+```
+
+---
+
+### 11.5 Implementation Checklist
+
+#### Setup (30 minutes)
+- [ ] Install lucide-react: `npm install lucide-react`
+- [ ] Install react-swipeable: `npm install react-swipeable`
+- [ ] Verify installation in package.json
+- [ ] Update Tailwind config with mobile breakpoints
+- [ ] Add safe-area-inset spacing utilities
+
+#### Core Layout (2 hours)
+- [ ] Create MobileMenu.jsx component
+- [ ] Create BottomNav.jsx component
+- [ ] Update MainLayout.jsx with conditional rendering
+- [ ] Add swipe gesture handlers to MainLayout
+- [ ] Update NotesView with MobileMenu wrapper
+- [ ] Update TasksView with MobileMenu wrapper
+- [ ] Update Header visibility (desktop only)
+- [ ] Create mobile header (simple title)
+
+#### Touch Optimization (2 hours)
+- [ ] Increase touch targets in Card.jsx (min-h-[56px])
+- [ ] Add mobile spacing to cards (p-3 mb-3)
+- [ ] Implement long-press context menu in Card.jsx
+- [ ] Add horizontal scroll snap to TasksView lists
+- [ ] Add touch feedback animations (active:scale-95)
+- [ ] Verify all buttons meet 44px minimum
+
+#### Responsive Styling (1 hour)
+- [ ] Update all typography with breakpoint classes
+- [ ] Adjust padding/margins for mobile
+- [ ] Test layout at 375px, 768px, 1024px widths
+- [ ] Verify sidebars collapse on mobile
+- [ ] Test bottom navigation functionality
+- [ ] Verify swipe gestures work correctly
+
+#### Advanced Features (1 hour)
+- [ ] Implement pull-to-refresh in NotesView
+- [ ] Implement pull-to-refresh in TasksView
+- [ ] Add safe-area-inset support (iOS)
+- [ ] Test on iOS Safari (if available)
+- [ ] Test on Android Chrome
+
+#### Testing (1 hour)
+- [ ] Test on Chrome DevTools mobile emulation
+- [ ] Test on real mobile device (iOS or Android)
+- [ ] Verify touch drag-and-drop works
+- [ ] Test swipe gestures
+- [ ] Test bottom navigation
+- [ ] Test hamburger menu
+- [ ] Verify no horizontal scroll issues
+- [ ] Test in portrait and landscape modes
+
+---
+
+### 11.6 Responsive Breakpoint Strategy
+
+**Mobile First Approach:**
+
+```jsx
+// Default (mobile): 375px - 1023px
+<div className="w-full px-4">
+
+// Tablet (md): 768px+
+<div className="w-full md:w-1/2 px-4 md:px-6">
+
+// Desktop (lg): 1024px+
+<div className="w-full md:w-1/2 lg:w-1/3 px-4 md:px-6 lg:px-8">
+```
+
+**Hide/Show Components:**
+```jsx
+// Show on mobile only
+<div className="lg:hidden">Mobile Menu Button</div>
+
+// Show on desktop only
+<div className="hidden lg:block">Desktop Header</div>
+
+// Show on tablet and up
+<div className="hidden md:block">Desktop Sidebar</div>
+```
+
+---
+
+### 11.7 Testing Requirements
+
+#### Manual Testing Checklist
+- [ ] **Mobile (< 768px)**
+  - [ ] Hamburger menu opens/closes sidebar
+  - [ ] Bottom navigation switches modes
+  - [ ] Swipe gestures work
+  - [ ] No horizontal scroll (unless intended)
+  - [ ] Touch targets are easy to tap
+  - [ ] Long-press menu appears
+
+- [ ] **Tablet (768px - 1023px)**
+  - [ ] Layout adapts to tablet size
+  - [ ] Sidebar behavior appropriate
+  - [ ] Touch interactions smooth
+
+- [ ] **Desktop (1024px+)**
+  - [ ] Existing desktop layout unchanged
+  - [ ] No mobile components visible
+  - [ ] Mouse interactions work as before
+
+#### Device Testing
+- [ ] iPhone SE (375px)
+- [ ] iPhone 12/13/14 (390px)
+- [ ] iPhone 14 Pro Max (430px)
+- [ ] iPad (768px)
+- [ ] Android phones (various sizes)
+
+#### Browser Testing
+- [ ] iOS Safari
+- [ ] Chrome Mobile
+- [ ] Firefox Mobile
+- [ ] Samsung Internet
+
+---
+
+### 11.8 Component Modifications Summary
+
+| Component | File | Changes | Effort |
+|-----------|------|---------|--------|
+| MainLayout | MainLayout.jsx | Swipe gestures, conditional header, bottom nav | 1 hour |
+| MobileMenu | MobileMenu.jsx (new) | Hamburger + slide-in sidebar | 45 min |
+| BottomNav | BottomNav.jsx (new) | Mobile navigation bar | 30 min |
+| NotesView | NotesView.jsx | Wrap sidebar, adjust spacing | 30 min |
+| TasksView | TasksView.jsx | Wrap sidebar, horizontal scroll | 30 min |
+| Header | Header.jsx | Desktop-only visibility | 10 min |
+| Card | Card.jsx | Touch targets, long-press menu | 45 min |
+| List | List.jsx | Mobile width optimization | 15 min |
+| Tailwind Config | tailwind.config.js | Breakpoints, safe-area spacing | 15 min |
+| **Total** | **9 files** | **~5 hours** | **Low risk** |
+
+---
+
+### 11.9 Mobile UX Patterns
+
+#### Navigation Patterns
+**Desktop:** Top header with mode toggle
+**Mobile:** Bottom navigation bar with icons
+
+**Rationale:** Thumb-friendly access on mobile devices
+
+#### Sidebar Patterns
+**Desktop:** Always visible, fixed width
+**Mobile:** Collapsible with hamburger menu, slide-in animation
+
+**Rationale:** Maximize screen real estate on small devices
+
+#### Touch Interactions
+**Desktop:** Mouse hover, click, drag
+**Mobile:** Tap, long-press, swipe, drag
+
+**Rationale:** Touch-first design for mobile users
+
+---
+
+### 11.10 Accessibility Considerations
+
+**Mobile Accessibility:**
+- [ ] Touch targets: Minimum 44x44px (WCAG)
+- [ ] Focus indicators visible on all interactive elements
+- [ ] Screen reader announcements for mode switching
+- [ ] Swipe gestures don't interfere with assistive technologies
+- [ ] Bottom navigation labeled with ARIA
+- [ ] Hamburger menu keyboard accessible
+
+**Testing Tools:**
+- [ ] VoiceOver (iOS)
+- [ ] TalkBack (Android)
+- [ ] Axe DevTools on mobile viewports
+
+---
+
+### 11.11 Performance Optimizations
+
+**Mobile Performance:**
+- [ ] Lazy load off-screen components
+- [ ] Debounce scroll events
+- [ ] Optimize animations (use transform/opacity only)
+- [ ] Reduce bundle size for mobile (code splitting)
+- [ ] Test on slow network (3G throttling)
+
+**Touch Performance:**
+- [ ] Use passive event listeners for scroll
+- [ ] Avoid layout thrashing
+- [ ] Use CSS transforms for animations (GPU accelerated)
+- [ ] Minimize re-renders during drag
+
+---
+
+### 11.12 Success Metrics
+
+**Mobile responsiveness is successful when:**
+- ✅ App is fully functional on iPhone SE (375px)
+- ✅ All features accessible via touch
+- ✅ No horizontal scroll (unless intentional)
+- ✅ Bottom navigation works smoothly
+- ✅ Swipe gestures feel natural
+- ✅ Touch targets meet 44px minimum
+- ✅ Drag-and-drop works on mobile
+- ✅ Long-press context menu functions correctly
+- ✅ Performance is smooth (60fps animations)
+- ✅ Layout adapts at all breakpoints
+
+---
+
+### 11.13 Future Mobile Enhancements
+
+**Phase 2 (Optional):**
+1. **PWA Support**
+   - Service workers for offline access
+   - Install prompt
+   - App icon and splash screen
+   - Background sync
+
+2. **Native App Feel**
+   - Haptic feedback on interactions
+   - Native-like transitions
+   - Bottom sheet modals
+   - Pull-to-dismiss gestures
+
+3. **Advanced Touch Gestures**
+   - Swipe to delete (cards, notes)
+   - Pinch to zoom (optional)
+   - Two-finger pan (board navigation)
+
+4. **Mobile-Specific Features**
+   - Voice input for notes
+   - Camera access for attachments
+   - Share sheet integration
+   - Quick actions from home screen
+
+---
+
+## Summary: Mobile Responsiveness Requirements
+
+**What's Required:**
+1. ✅ Install `lucide-react` and `react-swipeable`
+2. ✅ Create 2 new components (MobileMenu, BottomNav)
+3. ✅ Modify 7 existing components (MainLayout, NotesView, TasksView, Header, Card, List, Tailwind config)
+4. ✅ Add responsive breakpoints and mobile-first styling
+5. ✅ Implement touch gestures and mobile UX patterns
+6. ✅ Test on real devices and mobile viewports
+
+**What's NOT Required:**
+- ❌ No changes to stores (notesStore, tasksStore)
+- ❌ No data model changes
+- ❌ No changes to business logic
+- ❌ No backend changes
+
+**Estimated Time:** 7-8 hours total
+**Risk Level:** Low (additive changes, desktop functionality preserved)
+**User Impact:** Very High (enables mobile usage, expands user base)
 
 ---

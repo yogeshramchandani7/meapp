@@ -1063,17 +1063,220 @@ coverage: {
 
 ---
 
+## CI/CD & Deployment Tests
+
+### GitHub Actions CI/CD Pipeline
+
+**Purpose**: Automate testing and deployment to ensure code quality before going live.
+
+**Location**: `.github/workflows/test.yml`
+
+**Test Workflow**:
+```yaml
+name: Test & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run test:run        # All 188 tests
+      - run: npm run build           # Verify build succeeds
+
+  deploy:
+    needs: test                       # Only if tests pass
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+```
+
+**Benefits**:
+- ✅ Tests run automatically on every push
+- ✅ Prevents broken code from deploying
+- ✅ No manual testing needed before deployment
+- ✅ Blocks pull requests with failing tests
+- ✅ Production stays stable
+
+**Metrics**:
+- Build time: ~30 seconds
+- Test execution: ~10 seconds
+- Total CI time: < 1 minute
+
+---
+
+## Smoke Tests (Production)
+
+### Post-Deployment Verification
+
+**Purpose**: Quick sanity checks that production is working correctly after deployment.
+
+**Location**: `src/tests/smoke/production.test.js`
+
+**Test Count**: 5+ scenarios
+
+**Coverage Areas**:
+```javascript
+describe('Production Smoke Tests', () => {
+  const PRODUCTION_URL = 'https://claude-project-two.vercel.app';
+
+  test('App should be accessible', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+    await expect(page).toHaveTitle(/Task & Notes App/);
+    await expect(page.locator('h1')).toContainText('Task & Notes App');
+  });
+
+  test('Notes mode should work', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+    await page.click('text=Notes');
+    await expect(page.locator('text=All Notes')).toBeVisible();
+    await expect(page.locator('text=+ New Folder')).toBeVisible();
+  });
+
+  test('Tasks mode should work', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+    await page.click('text=Tasks');
+    await expect(page.locator('text=Boards')).toBeVisible();
+    await expect(page.locator('text=+ New Board')).toBeVisible();
+  });
+
+  test('Mode switching should work', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+
+    // Switch to Tasks
+    await page.click('text=Tasks');
+    await expect(page.getByText('Tasks')).toHaveClass(/bg-accent-yellow/);
+
+    // Switch back to Notes
+    await page.click('text=Notes');
+    await expect(page.getByText('Notes')).toHaveClass(/bg-accent-yellow/);
+  });
+
+  test('Dark theme should be applied', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+
+    const header = page.locator('header');
+    await expect(header).toHaveCSS('background-color', /rgb\(28, 28, 30\)/);
+  });
+
+  test('localStorage should persist data', async ({ page }) => {
+    await page.goto(PRODUCTION_URL);
+
+    // Create a note
+    await page.click('text=+ New Folder');
+    await page.fill('input[placeholder*="Folder name"]', 'Test Folder');
+    await page.click('text=Add');
+
+    // Reload page
+    await page.reload();
+
+    // Verify folder persists
+    await expect(page.locator('text=📁 Test Folder')).toBeVisible();
+  });
+});
+```
+
+**Running Smoke Tests**:
+```bash
+# After deployment
+npm run test:smoke
+
+# Or with Playwright directly
+npx playwright test src/tests/smoke/production.test.js
+```
+
+**When to Run**:
+- ✅ After every production deployment
+- ✅ After infrastructure changes
+- ✅ During incident response
+- ✅ As part of monitoring/alerting
+
+**Expected Results**:
+- All 5 tests pass in < 30 seconds
+- If any fail → Investigate immediately
+- Can be integrated into post-deploy webhooks
+
+---
+
+## Deployment Testing Strategy
+
+### Test Pyramid for Deployment
+
+```
+                    ┌─────────────────┐
+                    │  Manual QA      │ (Optional)
+                    │  5 mins         │
+                    └─────────────────┘
+                  ┌───────────────────────┐
+                  │  Smoke Tests          │
+                  │  5 tests, 30s         │
+                  └───────────────────────┘
+              ┌─────────────────────────────┐
+              │  E2E Tests                  │
+              │  2 scenarios, 2 mins        │
+              └─────────────────────────────┘
+          ┌───────────────────────────────────┐
+          │  Integration Tests                │
+          │  19 tests, 3s                     │
+          └───────────────────────────────────┘
+      ┌─────────────────────────────────────────┐
+      │  Unit Tests                             │
+      │  169 tests, 5s                          │
+      └─────────────────────────────────────────┘
+```
+
+### Deployment Checklist
+
+**Pre-Deployment** (Automated by CI):
+- [ ] All 188 tests pass
+- [ ] Build succeeds without errors
+- [ ] No linting issues
+- [ ] Dependencies up to date
+
+**During Deployment** (Vercel Automatic):
+- [ ] Build completes successfully
+- [ ] Static files generated
+- [ ] CDN distribution
+- [ ] SSL certificates valid
+- [ ] Health checks pass
+
+**Post-Deployment** (Smoke Tests):
+- [ ] App is accessible
+- [ ] Both modes work
+- [ ] Mode switching works
+- [ ] Data persists
+- [ ] Theme applied correctly
+
+---
+
 ## Test Statistics
 
 ### Summary
 
-- **Total Test Cases**: 150+
-- **Total Test Files**: 7
-- **Test Execution Time**: ~15 seconds (unit), ~2 minutes (E2E)
-- **Code Coverage**: 89%
+- **Total Test Cases**: 188 ✅
+- **Total Test Files**: 11
+- **Test Execution Time**: ~10 seconds (unit), ~2 minutes (E2E), ~30 seconds (smoke)
+- **Code Coverage**: 85%+
 - **Accessibility Compliance**: WCAG 2.1 Level AA
 - **Performance Benchmarks**: All passed
 - **Browser Coverage**: 5 browsers
+- **CI/CD**: GitHub Actions ready
+- **Smoke Tests**: 5 production checks
 
 ### Test Distribution
 

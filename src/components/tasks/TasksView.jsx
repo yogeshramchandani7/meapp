@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useTasksStore } from '../../store/tasksStore';
+import MobileMenu from '../layout/MobileMenu';
 import BoardSidebar from './BoardSidebar';
 import List from './List';
 import Card from './Card';
@@ -145,20 +146,24 @@ export default function TasksView() {
       </div>
 
       <div className="h-full flex">
-        {/* Board Sidebar */}
-        <BoardSidebar />
+        {/* Board Sidebar - Wrapped in MobileMenu for responsive behavior */}
+        <MobileMenu title="Boards">
+          <BoardSidebar />
+        </MobileMenu>
 
         {/* Board Area */}
         <div className="flex-1 bg-bg-app overflow-x-auto">
           {selectedBoard ? (
-            <div className="p-6">
-              <h1 className="text-2xl font-bold text-text-primary mb-6">{selectedBoard.name}</h1>
+            <div className="p-4 md:p-6">
+              <h1 className="text-xl md:text-2xl font-bold text-text-primary mb-4 md:mb-6">{selectedBoard.name}</h1>
 
-              {/* Lists Container */}
-              <div className="flex gap-4">
+              {/* Lists Container - Horizontal scroll with snap points for mobile */}
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
                 {/* Render Lists */}
                 {lists.map(list => (
-                  <List key={list.id} list={list} />
+                  <div key={list.id} className="snap-start">
+                    <List list={list} />
+                  </div>
                 ))}
 
                 {/* Add List Button/Form */}

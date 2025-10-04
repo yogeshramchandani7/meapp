@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNotesStore } from '../../store/notesStore';
+import MobileMenu from '../layout/MobileMenu';
 import FolderSelector from './FolderSelector';
 import NotesList from './NotesList';
 import NoteEditor from './NoteEditor';
@@ -14,8 +15,8 @@ export default function NotesView() {
 
   return (
     <div className="h-full flex bg-bg-app text-text-primary">
-      {/* Left Sidebar - Notes List */}
-      <div className="w-64 bg-bg-panel border-r border-border flex flex-col">
+      {/* Left Sidebar - Wrapped in MobileMenu for responsive behavior */}
+      <MobileMenu title="Notes">
         {/* Search */}
         <div className="p-3">
           <div className="relative">
@@ -34,9 +35,9 @@ export default function NotesView() {
 
         {/* Notes List */}
         <NotesList />
-      </div>
+      </MobileMenu>
 
-      {/* Right Side - Note Editor */}
+      {/* Right Side - Note Editor (Full width on mobile, flex-1 on desktop) */}
       <div className="flex-1 bg-bg-app">
         <NoteEditor />
       </div>
