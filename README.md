@@ -42,6 +42,24 @@ A modern, feature-rich task management and note-taking application built with Re
 - **date-fns** - Date formatting and manipulation
 - **localStorage** - Data persistence
 
+## Data Storage & Persistence
+
+This app uses **browser localStorage** for data persistence - no backend or database required!
+
+### How It Works
+
+- All notes, tasks, folders, and boards are **automatically saved** to your browser's localStorage
+- Data **persists between sessions** - close the tab/browser and come back anytime
+- **No account needed** - your data stays private on your device
+- **Works offline** - no internet connection required
+
+### Important Notes
+
+- **Device/Browser Specific**: Data is stored locally in your browser and won't sync across devices or different browsers
+- **Storage Limit**: Most browsers allow 5-10MB of localStorage (more than enough for thousands of notes)
+- **Private/Incognito Mode**: Data will be cleared when you close the browser in private/incognito mode
+- **Clearing Browser Data**: If you clear your browser's cache/cookies, your notes and tasks will be deleted
+
 ## Getting Started
 
 ### Prerequisites
@@ -138,6 +156,39 @@ src/
 ## License
 
 MIT
+
+## Troubleshooting
+
+### Notes or Tasks Disappearing?
+
+If your notes or tasks are disappearing when you close the browser:
+
+1. **Check Browser Mode**: Are you using Private/Incognito mode? Data is automatically cleared when you close private windows
+2. **Browser Settings**: Check if your browser is set to "Clear cookies and site data when you close all windows"
+3. **Storage Permissions**: Ensure your browser allows localStorage for this site
+4. **Browser Updates**: Try updating to the latest browser version
+5. **Test localStorage**: Open browser console (F12) and run:
+   ```javascript
+   localStorage.setItem('test', 'data');
+   localStorage.getItem('test'); // Should return 'data'
+   ```
+
+### Storage Full?
+
+If you see errors about storage:
+
+- Each browser typically allows 5-10MB of localStorage
+- Try deleting old folders/boards you no longer need
+- Consider exporting important data (feature coming soon!)
+
+### Data Not Syncing?
+
+Remember: This app uses **localStorage**, which is device and browser-specific. Your data will NOT sync:
+- Between different devices (phone vs laptop)
+- Between different browsers (Chrome vs Firefox)
+- Across browser profiles
+
+For multi-device sync, you'd need a backend service (not currently implemented).
 
 ## Contributing
 

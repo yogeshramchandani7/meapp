@@ -28,7 +28,7 @@ export default function TasksView() {
   // Load data on mount
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const selectedBoard = boards.find(b => b.id === selectedBoardId);
   const lists = getListsForBoard(selectedBoardId);

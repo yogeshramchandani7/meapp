@@ -132,6 +132,52 @@ describe('Notes Feature Integration Tests', () => {
         expect(screen.getByText(/📁 persistent folder/i)).toBeInTheDocument();
       });
     });
+
+    it('should persist note content and metadata across reloads', async () => {
+      const user = userEvent.setup();
+
+      // First render: create note with content
+      const { unmount } = render(<NotesView />);
+
+      await user.click(screen.getByText(/\+ new folder/i));
+      await user.type(screen.getByPlaceholderText(/folder name/i), 'Test');
+      await user.click(screen.getByText(/add/i));
+
+      await waitFor(() => {
+        const folderSelect = screen.getByRole('combobox');
+        user.selectOptions(folderSelect, screen.getByText(/📁 test/i));
+      });
+
+      await user.click(screen.getByRole('button', { name: /new note/i }));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/note title/i)).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByPlaceholderText(/note title/i);
+      const contentTextarea = screen.getByPlaceholderText(/start typing/i);
+
+      await user.type(titleInput, 'Persistent Note');
+      await user.type(contentTextarea, 'This content should persist!');
+
+      // Wait for auto-save
+      await waitFor(() => {
+        const storedNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+        expect(storedNotes[0].title).toBe('Persistent Note');
+      }, { timeout: 1000 });
+
+      unmount();
+
+      // Second render: verify content persists
+      render(<NotesView />);
+
+      await waitFor(() => {
+        const storedNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+        expect(storedNotes).toHaveLength(1);
+        expect(storedNotes[0].title).toBe('Persistent Note');
+        expect(storedNotes[0].content).toBe('This content should persist!');
+      });
+    });
   });
 
   describe('Error Handling', () => {

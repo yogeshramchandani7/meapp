@@ -12,7 +12,7 @@ export default function NotesView() {
   // Load data from localStorage on mount
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (isLoading) {
     return (
