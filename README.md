@@ -71,8 +71,8 @@ This app uses **browser localStorage** for data persistence - no backend or data
 
 1. Clone the repository
 ```bash
-git clone <repository-url>
-cd claude-project
+git clone https://github.com/your-username/task-and-notes-app.git
+cd task-and-notes-app
 ```
 
 2. Install dependencies

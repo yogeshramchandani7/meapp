@@ -1,7 +1,15 @@
 {
-  "name": "my-app",
-  "private": true,
-  "version": "0.0.0",
+  "name": "task-and-notes-app",
+  "private": false,
+  "version": "1.0.0",
+  "description": "A modern task management and note-taking app with drag-and-drop, built with React and localStorage",
+  "keywords": ["notes", "tasks", "kanban", "todo", "react", "drag-and-drop", "productivity"],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/task-and-notes-app.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
