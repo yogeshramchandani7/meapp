@@ -219,21 +219,20 @@ export default function NoteEditor() {
       </div>
 
       {/* Color Picker */}
-      <div className="mb-6 pb-4 border-b border-border">
-        <h3 className="text-xs font-semibold text-text-tertiary mb-3">Note Color</h3>
-        <div className="flex gap-3">
+      <div className="mb-3">
+        <div className="flex gap-1.5">
           {NOTE_COLOR_OPTIONS.map((option) => (
             <button
               key={option.name}
               onClick={() => handleColorChange(option.name)}
-              className={`group relative w-10 h-10 rounded-full transition-all duration-200 hover:scale-110 ${
-                (selectedNote.color || 'default') === option.name ? `ring-2 ${option.ring} ring-offset-2 ring-offset-bg-app` : ''
+              className={`group relative w-6 h-6 rounded-full transition-all duration-200 hover:scale-110 ${
+                (selectedNote.color || 'default') === option.name ? `ring-2 ${option.ring} ring-offset-1 ring-offset-bg-app` : ''
               }`}
               style={{ backgroundColor: option.color }}
               title={option.label}
             >
               {(selectedNote.color || 'default') === option.name && (
-                <span className="absolute inset-0 flex items-center justify-center text-white text-lg">✓</span>
+                <span className="absolute inset-0 flex items-center justify-center text-white text-xs">✓</span>
               )}
             </button>
           ))}
