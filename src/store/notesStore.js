@@ -26,8 +26,15 @@ export const useNotesStore = create((set, get) => ({
 
       set({ folders, notes, isLoading: false });
 
-      // Select first folder if exists and no folder selected
-      if (folders.length > 0 && !get().selectedFolderId) {
+      // Auto-create default folder for first-time users
+      if (folders.length === 0) {
+        const defaultFolder = await foldersService.create({
+          name: 'General',
+          noteCount: 0
+        });
+        set({ folders: [defaultFolder], selectedFolderId: defaultFolder.id });
+      } else if (!get().selectedFolderId) {
+        // Select first folder if no folder currently selected
         set({ selectedFolderId: folders[0].id });
       }
     } catch (error) {
