@@ -5,6 +5,8 @@ import BottomNav from './BottomNav';
 import NotesView from '../notes/NotesView';
 import TasksView from '../tasks/TasksView';
 import ToastProvider from '../ui/ToastProvider';
+import ChatButton from '../ai-chat/ChatButton';
+import ChatWidget from '../ai-chat/ChatWidget';
 
 export default function MainLayout() {
   const [currentMode, setCurrentMode] = useState('notes');
@@ -51,6 +53,10 @@ export default function MainLayout() {
           onModeChange={setCurrentMode}
           onQuickAdd={handleQuickAdd}
         />
+
+        {/* AI Chat */}
+        <ChatButton />
+        <ChatWidget />
       </div>
     </>
   );
