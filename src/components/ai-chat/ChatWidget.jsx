@@ -7,7 +7,7 @@ import ChatInput from './ChatInput';
 import SetupView from './SetupView';
 
 export default function ChatWidget() {
-  const { isOpen, closeChat, isConfigured, initialize } = useChatStore();
+  const { isOpen, closeChat, isConfigured, isUnlocked, initialize } = useChatStore();
 
   // Initialize store on mount
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function ChatWidget() {
           >
             <ChatHeader />
 
-            {!isConfigured ? (
+            {!isConfigured || !isUnlocked ? (
               <SetupView />
             ) : (
               <>

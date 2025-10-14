@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { ChatService } from '../services/ai/chatService';
-import { encryptData, decryptData } from '../utils/encryption';
 import {
   saveConversation,
   loadConversation,
@@ -37,10 +36,9 @@ export const useChatStore = create((set, get) => ({
   toggleChat: () => set(state => ({ isOpen: !state.isOpen })),
 
   // API key management
-  setApiKey: async (key, password, provider = AI_PROVIDERS.GEMINI) => {
+  setApiKey: (key, provider = AI_PROVIDERS.GEMINI) => {
     try {
-      const encrypted = await encryptData(key, password);
-      localStorage.setItem('ai_api_key', JSON.stringify(encrypted));
+      localStorage.setItem('ai_api_key', key);
       localStorage.setItem('ai_provider', provider);
 
       set({
@@ -61,21 +59,18 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  loadApiKey: async (password) => {
+  loadApiKey: () => {
     try {
       const stored = localStorage.getItem('ai_api_key');
       const provider = localStorage.getItem('ai_provider') || AI_PROVIDERS.GEMINI;
 
       if (!stored) {
-        set({ isConfigured: false });
+        set({ isConfigured: false, isUnlocked: false });
         return false;
       }
 
-      const encrypted = JSON.parse(stored);
-      const key = await decryptData(encrypted, password);
-
       set({
-        apiKey: key,
+        apiKey: stored,
         provider,
         isConfigured: true,
         isUnlocked: true,
@@ -85,8 +80,7 @@ export const useChatStore = create((set, get) => ({
       return true;
     } catch (error) {
       console.error('Error loading API key:', error);
-      set({ error: 'Invalid password' });
-      toast.error('Invalid password');
+      set({ error: 'Failed to load API key' });
       return false;
     }
   },
@@ -166,7 +160,13 @@ export const useChatStore = create((set, get) => ({
     } catch (error) {
       console.error('Error sending message:', error);
       set({ error: error.message });
-      toast.error(`Error: ${error.message}`);
+
+      // Provide helpful error messages
+      if (error.message.includes('Invalid API key') || error.message.includes('API key not valid')) {
+        toast.error('Invalid API key. Please reconfigure your API key using the settings button.');
+      } else {
+        toast.error(`Error: ${error.message}`);
+      }
     } finally {
       set({ isTyping: false });
     }
@@ -187,6 +187,23 @@ export const useChatStore = create((set, get) => ({
 
   // Initialize store
   initialize: () => {
+    // Migrate old encrypted data format
+    const storedKey = localStorage.getItem('ai_api_key');
+    if (storedKey) {
+      try {
+        // Check if it's old encrypted format (JSON with encrypted/iv properties)
+        const parsed = JSON.parse(storedKey);
+        if (parsed && typeof parsed === 'object' && (parsed.encrypted || parsed.iv)) {
+          // Old encrypted format detected - clear it
+          console.log('Detected old encrypted API key format, clearing...');
+          localStorage.removeItem('ai_api_key');
+          toast.error('Please reconfigure your API key');
+        }
+      } catch (e) {
+        // Not JSON, probably plain text - this is fine
+      }
+    }
+
     const messages = loadConversation();
     const hasApiKey = !!localStorage.getItem('ai_api_key');
     const provider = localStorage.getItem('ai_provider') || AI_PROVIDERS.GEMINI;
@@ -200,5 +217,10 @@ export const useChatStore = create((set, get) => ({
         ? messages[messages.length - 1].timestamp
         : null
     });
+
+    // Auto-load API key if it exists
+    if (hasApiKey) {
+      get().loadApiKey();
+    }
   }
 }));

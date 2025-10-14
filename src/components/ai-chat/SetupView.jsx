@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useChatStore } from '../../store/chatStore';
-import { AI_PROVIDERS, PROVIDER_INFO } from '../../services/ai/providers/providerFactory';
+import { AI_PROVIDERS, PROVIDER_INFO, createProvider } from '../../services/ai/providers/providerFactory';
 import toast from 'react-hot-toast';
 
 export default function SetupView() {
   const [selectedProvider, setSelectedProvider] = useState(AI_PROVIDERS.GEMINI);
   const [apiKey, setApiKey] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { setApiKey: saveApiKey } = useChatStore();
 
@@ -15,23 +14,38 @@ export default function SetupView() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!apiKey || !password) {
-      toast.error('Please fill in all fields');
+    if (!apiKey) {
+      toast.error('Please enter your API key');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Save API key (encrypted)
-      const success = await saveApiKey(apiKey, password, selectedProvider);
+      // Validate API key by testing it
+      toast.loading('Validating API key...', { id: 'validating' });
+
+      const provider = createProvider(selectedProvider, apiKey);
+      const isValid = await provider.testConnection();
+
+      toast.dismiss('validating');
+
+      if (!isValid) {
+        toast.error('API key validation failed. Please check your key.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Save API key (plain text)
+      const success = saveApiKey(apiKey, selectedProvider);
 
       if (success) {
-        toast.success('Setup complete! You can now chat with AI.');
+        toast.success('Setup complete! API key validated and saved.');
       }
     } catch (error) {
       console.error('Setup error:', error);
-      toast.error('Failed to save API key');
+      toast.dismiss('validating');
+      toast.error(error.message || 'Failed to validate API key. Please check and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -113,22 +127,9 @@ export default function SetupView() {
           </a>
         </div>
 
-        <div>
-          <label className="block text-sm text-text-secondary mb-2">
-            Password (to encrypt your key)
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Choose a secure password"
-            className="w-full px-4 py-2 bg-bg-elevated border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-yellow"
-          />
-        </div>
-
         <button
           type="submit"
-          disabled={!apiKey || !password || isLoading}
+          disabled={!apiKey || isLoading}
           className="w-full py-2 bg-accent-yellow text-text-inverse rounded-lg font-semibold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {isLoading ? 'Setting up...' : 'Get Started'}
@@ -146,7 +147,7 @@ export default function SetupView() {
 
       <div className="mt-4 p-4 bg-bg-elevated rounded-lg border border-border max-w-md">
         <p className="text-xs text-text-tertiary">
-          🔒 Your API key is encrypted and stored locally on your device. We never see or store your data.
+          🔒 Your API key is stored locally on your device. We never see or access your data.
         </p>
       </div>
     </div>

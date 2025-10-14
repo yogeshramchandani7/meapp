@@ -1,5 +1,5 @@
 export class GeminiProvider {
-  constructor(apiKey, model = 'gemini-1.5-flash-latest') {
+  constructor(apiKey, model = 'gemini-2.0-flash') {
     this.apiKey = apiKey;
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
     this.model = model;

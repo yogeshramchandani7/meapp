@@ -12,14 +12,19 @@ export const PROVIDER_INFO = {
     description: 'Fast, reliable, and free tier available',
     models: [
       {
-        id: 'gemini-1.5-flash-latest',
-        name: 'Gemini 1.5 Flash',
+        id: 'gemini-2.0-flash',
+        name: 'Gemini 2.0 Flash',
         speed: 'Very Fast',
         recommended: true
       },
       {
-        id: 'gemini-1.5-pro-latest',
-        name: 'Gemini 1.5 Pro',
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        speed: 'Very Fast'
+      },
+      {
+        id: 'gemini-2.5-pro',
+        name: 'Gemini 2.5 Pro',
         speed: 'Fast'
       }
     ],
@@ -67,7 +72,7 @@ export const PROVIDER_INFO = {
 export function createProvider(providerType, apiKey, model = null) {
   switch (providerType) {
     case AI_PROVIDERS.GEMINI:
-      return new GeminiProvider(apiKey, model || 'gemini-1.5-flash-latest');
+      return new GeminiProvider(apiKey, model || 'gemini-2.0-flash');
 
     case AI_PROVIDERS.CLAUDE:
       return new ClaudeProvider(apiKey, model || 'claude-3-5-haiku-20241022');
@@ -103,7 +108,7 @@ export function recommendProvider(requirements = {}) {
   if (budget === 'free') {
     return {
       provider: AI_PROVIDERS.GEMINI,
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-2.0-flash',
       reason: 'Free tier with 15 requests/minute'
     };
   }
@@ -111,7 +116,7 @@ export function recommendProvider(requirements = {}) {
   // Default recommendation
   return {
     provider: AI_PROVIDERS.GEMINI,
-    model: 'gemini-1.5-flash-latest',
+    model: 'gemini-2.0-flash',
     reason: 'Best balance of speed, cost, and quality'
   };
 }
