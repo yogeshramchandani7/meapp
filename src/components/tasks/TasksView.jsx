@@ -8,21 +8,23 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { motion } from 'framer-motion';
 import { useTasksStore } from '../../store/tasksStore';
 import MobileMenu from '../layout/MobileMenu';
 import BoardSidebar from './BoardSidebar';
+import SortableList from './SortableList';
 import List from './List';
 import Card from './Card';
 import CardModal from './CardModal';
 import { TasksSkeleton } from '../ui/Skeleton';
 
 export default function TasksView() {
-  const { loadData, boards, selectedBoardId, getListsForBoard, createList, moveCard, getCardsForList, isLoading } = useTasksStore();
+  const { loadData, boards, selectedBoardId, getListsForBoard, createList, moveCard, reorderList, getCardsForList, isLoading } = useTasksStore();
   const [showAddList, setShowAddList] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [activeCard, setActiveCard] = useState(null);
+  const [activeList, setActiveList] = useState(null);
   const [announcement, setAnnouncement] = useState('');
 
   // Load data on mount
@@ -47,8 +49,12 @@ export default function TasksView() {
 
   const handleDragStart = (event) => {
     const { active } = event;
-    if (active.data.current?.type === 'card') {
-      setActiveCard(active.data.current.card);
+    const activeData = active.data.current;
+
+    if (activeData?.type === 'card') {
+      setActiveCard(activeData.card);
+    } else if (activeData?.type === 'list') {
+      setActiveList(activeData.list);
     }
   };
 
@@ -59,7 +65,19 @@ export default function TasksView() {
     const activeData = active.data.current;
     const overData = over.data.current;
 
-    // Only handle card dragging
+    // Handle list reordering
+    if (activeData?.type === 'list' && overData?.type === 'list') {
+      const activeListId = active.id;
+      const overListId = over.id;
+
+      if (activeListId !== overListId) {
+        const overList = overData.list;
+        reorderList(activeListId, overList.position);
+      }
+      return;
+    }
+
+    // Only handle card dragging beyond this point
     if (activeData?.type !== 'card') return;
 
     const activeCardId = active.id;
@@ -101,20 +119,30 @@ export default function TasksView() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
+    const activeData = active.data.current;
 
-    if (over && active.data.current?.card) {
-      const card = active.data.current.card;
+    if (over) {
       const overData = over.data.current;
 
-      if (overData?.type === 'list') {
-        const list = overData.list;
-        setAnnouncement(`Moved "${card.title}" to ${list.name} list`);
-      } else if (overData?.type === 'card') {
-        setAnnouncement(`Reordered "${card.title}"`);
+      // Handle list reordering announcement
+      if (activeData?.type === 'list' && activeData.list) {
+        setAnnouncement(`Reordered "${activeData.list.name}" list`);
+      }
+      // Handle card movement announcement
+      else if (activeData?.card) {
+        const card = activeData.card;
+
+        if (overData?.type === 'list') {
+          const list = overData.list;
+          setAnnouncement(`Moved "${card.title}" to ${list.name} list`);
+        } else if (overData?.type === 'card') {
+          setAnnouncement(`Reordered "${card.title}"`);
+        }
       }
     }
 
     setActiveCard(null);
+    setActiveList(null);
 
     // Clear announcement after screen reader reads it
     setTimeout(() => setAnnouncement(''), 1000);
@@ -178,12 +206,12 @@ export default function TasksView() {
 
               {/* Lists Container - Horizontal scroll with snap points for mobile */}
               <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
-                {/* Render Lists */}
-                {lists.map(list => (
-                  <div key={list.id} className="snap-start">
-                    <List list={list} />
-                  </div>
-                ))}
+                {/* Render Lists with Drag & Drop */}
+                <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
+                  {lists.map(list => (
+                    <SortableList key={list.id} list={list} />
+                  ))}
+                </SortableContext>
 
                 {/* Add List Button/Form */}
                 <div className="w-72 flex-shrink-0">
@@ -365,6 +393,10 @@ export default function TasksView() {
                 ))}
               </div>
             )}
+          </div>
+        ) : activeList ? (
+          <div className="w-80 md:w-72 opacity-80 rotate-2 cursor-grabbing">
+            <List list={activeList} />
           </div>
         ) : null}
       </DragOverlay>
